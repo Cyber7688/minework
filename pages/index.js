@@ -44,10 +44,6 @@ function fmt(n, digits = 2) {
   return Number(n).toLocaleString(undefined, { maximumFractionDigits: digits })
 }
 
-function short(addr) {
-  return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '-'
-}
-
 function extractSummary(profile, history, wallet) {
   const miner = profile?.miner || {}
   const validator = profile?.validator || {}
@@ -89,7 +85,6 @@ export default function Home() {
         profile: row?.profile || null,
         history: row?.history || [],
         summary: row?.summary || null,
-        error: row?.error || null,
       }
     })
   }, [profiles])
@@ -138,7 +133,19 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', background: `radial-gradient(circle at top left, rgba(103,232,249,0.10), transparent 25%), radial-gradient(circle at top right, rgba(167,139,250,0.12), transparent 22%), linear-gradient(180deg, ${COLORS.bg2} 0%, ${COLORS.bg} 100%)`, color: COLORS.text, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}>
-      <div style={{ maxWidth: 1650, margin: '0 auto', padding: '30px 20px 50px' }}>
+      <div style={{ maxWidth: 1650, margin: '0 auto', padding: '30px 16px 50px' }}>
+        <style>{`
+          @media (max-width: 900px) {
+            .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+            .panels-grid { grid-template-columns: 1fr !important; }
+            .desktop-table { display: none !important; }
+            .mobile-cards { display: block !important; }
+          }
+          @media (min-width: 901px) {
+            .mobile-cards { display: none !important; }
+          }
+        `}</style>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 26 }}>
           <div>
             <div style={{ color: COLORS.green, fontSize: 13, letterSpacing: 3, marginBottom: 10, textTransform: 'uppercase' }}>
@@ -146,7 +153,7 @@ export default function Home() {
             </div>
             <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>Fleet Monitoring Dashboard</h1>
             <p style={{ color: COLORS.subtext, marginTop: 12, marginBottom: 0, maxWidth: 860, lineHeight: 1.6 }}>
-              Live wallet lookup view for validator + miner fleet. Optimized for quick scanning, terminal vibes, and late-night ops checks.
+              Full wallet visibility, responsive layout for mobile, and cleaner fleet monitoring from one panel.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -159,7 +166,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
           <MetricCard label="RUNNING" value={fmt(totals.running, 0)} color={COLORS.green} />
           <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.yellow} />
           <MetricCard label="TASKS" value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
@@ -168,10 +175,11 @@ export default function Home() {
           <MetricCard label="AVG SCORE" value={fmt(totals.avgScore)} color={COLORS.cyan} />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div className="panels-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
           <Panel title="HOST MAP">
             <HostLine host="1387" count={rows.filter((r) => r.wallet.host === '1387').length} />
             <HostLine host="1691" count={rows.filter((r) => r.wallet.host === '1691').length} />
+            <HostLine host="local" count={rows.filter((r) => r.wallet.host === 'local').length} />
           </Panel>
           <Panel title="ROLE SPLIT">
             <HostLine host="miners" count={rows.filter((r) => r.wallet.role === 'miner').length} />
@@ -179,14 +187,14 @@ export default function Home() {
           </Panel>
           <Panel title="OPS NOTES">
             <div style={{ color: COLORS.subtext, fontSize: 13, lineHeight: 1.7 }}>
-              - Public wallet-only dashboard, no secrets exposed.<br />
-              - Rewards/task data comes from MineWork wallet lookup.<br />
-              - Use VPS scripts for process-level control and proxy checks.
+              - Full wallet addresses are shown below.<br />
+              - Mobile view switches to stacked cards for readability.<br />
+              - No private keys, proxy credentials, or secrets are exposed.
             </div>
           </Panel>
         </div>
 
-        <div style={{ overflowX: 'auto', background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: '0 10px 50px rgba(0,0,0,0.35), inset 0 0 40px rgba(96,165,250,0.04)' }}>
+        <div className="desktop-table" style={{ overflowX: 'auto', background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: '0 10px 50px rgba(0,0,0,0.35), inset 0 0 40px rgba(96,165,250,0.04)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: COLORS.panelStrong }}>
@@ -201,14 +209,10 @@ export default function Home() {
                 return (
                   <tr key={wallet.address} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
                     <td style={{ padding: 12, fontWeight: 700, color: COLORS.text }}>{wallet.name}</td>
-                    <td style={{ padding: 12 }}>
-                      <Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} />
-                    </td>
+                    <td style={{ padding: 12 }}><Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} /></td>
                     <td style={{ padding: 12, color: COLORS.subtext }}>{wallet.host}</td>
-                    <td style={{ padding: 12, color: COLORS.cyan }}>{short(wallet.address)}</td>
-                    <td style={{ padding: 12 }}>
-                      <Badge color={status.color} text={status.label} />
-                    </td>
+                    <td style={{ padding: 12, color: COLORS.cyan, fontSize: 12, wordBreak: 'break-all', maxWidth: 320 }}>{wallet.address}</td>
+                    <td style={{ padding: 12 }}><Badge color={status.color} text={status.label} /></td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.credit) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.taskCount, 0) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.avgScore) : '-'}</td>
@@ -219,6 +223,32 @@ export default function Home() {
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="mobile-cards" style={{ display: 'none' }}>
+          {rows.map(({ wallet, summary }) => {
+            const status = getStatus(summary)
+            return (
+              <div key={wallet.address} style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <strong>{wallet.name}</strong>
+                  <Badge color={status.color} text={status.label} />
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+                  <Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} />
+                  <Badge color={COLORS.purple} text={`HOST ${wallet.host}`} />
+                </div>
+                <div style={{ color: COLORS.cyan, wordBreak: 'break-all', fontSize: 12, marginBottom: 12 }}>{wallet.address}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 10, fontSize: 13 }}>
+                  <SmallField label="Credit" value={summary ? fmt(summary.credit) : '-'} />
+                  <SmallField label="Tasks" value={summary ? fmt(summary.taskCount, 0) : '-'} />
+                  <SmallField label="Avg Score" value={summary ? fmt(summary.avgScore) : '-'} />
+                  <SmallField label="Qualified" value={summary ? fmt(summary.qualifiedEpochs, 0) : '-'} />
+                  <SmallField label="Rewards" value={summary ? fmt(summary.totalRewards) : '-'} />
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
@@ -257,5 +287,14 @@ function Badge({ text, color }) {
     <span style={{ display: 'inline-block', padding: '6px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.03)', border: `1px solid ${color}`, color, fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
       {text}
     </span>
+  )
+}
+
+function SmallField({ label, value }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: 10 }}>
+      <div style={{ color: COLORS.subtext, fontSize: 11, marginBottom: 6 }}>{label}</div>
+      <div style={{ color: COLORS.text, fontWeight: 700 }}>{value}</div>
+    </div>
   )
 }
