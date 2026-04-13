@@ -20,6 +20,7 @@ const DEFAULT_WALLETS = [
   { name: 'miner15', role: 'miner', host: '1691', address: '0xb1107E59E6628433Dd4ca33B7C495380dff54D0f' },
   { name: 'miner16', role: 'miner', host: '1691', address: '0xbD4CE9f6F3f84b65A1c6e09E2cAc1f95fEAec54D' },
   { name: 'miner17', role: 'miner', host: '1691', address: '0xa0c93250f1e8dA03beF26f5D96955ba0E01501fA' },
+  { name: '1', role: 'miner', host: 'LOKAL', address: '0x605E8042b009Fbc54424A3d957948ba155a285d9' },
 ]
 
 function fmt(n) {
