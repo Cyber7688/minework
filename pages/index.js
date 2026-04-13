@@ -1,26 +1,26 @@
 import { useMemo, useState } from 'react'
 
 const DEFAULT_WALLETS = [
-  { name: 'validator-0001', role: 'validator', host: '1387', address: '0x0001A97906Ac0a12E6F97eba3c3C4a44399614c4' },
-  { name: 'miner1387', role: 'miner', host: '1387', address: '0x9e3278Dc6A10B54ED08296F999a9e214edf4164a' },
-  { name: 'miner1', role: 'miner', host: '1691', address: '0x1410e83a725DE68494AC6f4c4F8c91a0c821Af1d' },
-  { name: 'miner2', role: 'miner', host: '1691', address: '0x4C363FC335eAf5c5D4330Ec5b493ECCB5162193A' },
-  { name: 'miner3', role: 'miner', host: '1691', address: '0x83c9fc9F42F33437721d7d7baA63FD3127aB7E73' },
-  { name: 'miner4', role: 'miner', host: '1691', address: '0x5940DE4e11B44d24a15bB745Fca823Ae61df3F96' },
-  { name: 'miner5', role: 'miner', host: '1691', address: '0x2f5Da0c177C7BBF56977A944c9Db93e504ba1BD8' },
-  { name: 'miner6', role: 'miner', host: '1691', address: '0x1ca521653a57854BB547E4e63119aC97a0284BEF' },
-  { name: 'miner7', role: 'miner', host: '1691', address: '0x5451Cc662D5D2aC93694ba49811Bc58121A8784a' },
-  { name: 'miner8', role: 'miner', host: '1691', address: '0x4508cca9Db55f7a2fAe07D56e1647899C3025CEf' },
-  { name: 'miner9', role: 'miner', host: '1691', address: '0x03f35db06529f78B99C1a405D3153D7Df87cb642' },
-  { name: 'miner10', role: 'miner', host: '1691', address: '0xcb7efeB724a980E6c4493bD1b0A527E407560461' },
-  { name: 'miner11', role: 'miner', host: '1691', address: '0x1B71eDDa2607c4eB15d9116774c0C3D8fAF3f090' },
-  { name: 'miner12', role: 'miner', host: '1691', address: '0x88c483135fAD4a2FB46946F3225044E12Acf0A68' },
-  { name: 'miner13', role: 'miner', host: '1691', address: '0xEAD6D012E5530a6287b9A85bBB5e2d55add79d26' },
-  { name: 'miner14', role: 'miner', host: '1691', address: '0x7b1a5efA12F53be548bb2400D6905c0a884Db590' },
-  { name: 'miner15', role: 'miner', host: '1691', address: '0xb1107E59E6628433Dd4ca33B7C495380dff54D0f' },
-  { name: 'miner16', role: 'miner', host: '1691', address: '0xbD4CE9f6F3f84b65A1c6e09E2cAc1f95fEAec54D' },
-  { name: 'miner17', role: 'miner', host: '1691', address: '0xa0c93250f1e8dA03beF26f5D96955ba0E01501fA' },
-  { name: 'miner-local-extra', role: 'miner', host: 'local', address: '0x605E8042b009Fbc54424A3d957948ba155a285d9' },
+  { name: 'validator-0001', role: 'validator', host: '1387', datasets: ['validator'], address: '0x0001A97906Ac0a12E6F97eba3c3C4a44399614c4' },
+  { name: 'miner1387', role: 'miner', host: '1387', datasets: ['ds_arxiv'], address: '0x9e3278Dc6A10B54ED08296F999a9e214edf4164a' },
+  { name: 'miner1', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x1410e83a725DE68494AC6f4c4F8c91a0c821Af1d' },
+  { name: 'miner2', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x4C363FC335eAf5c5D4330Ec5b493ECCB5162193A' },
+  { name: 'miner3', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x83c9fc9F42F33437721d7d7baA63FD3127aB7E73' },
+  { name: 'miner4', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x5940DE4e11B44d24a15bB745Fca823Ae61df3F96' },
+  { name: 'miner5', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x2f5Da0c177C7BBF56977A944c9Db93e504ba1BD8' },
+  { name: 'miner6', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x1ca521653a57854BB547E4e63119aC97a0284BEF' },
+  { name: 'miner7', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x5451Cc662D5D2aC93694ba49811Bc58121A8784a' },
+  { name: 'miner8', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x4508cca9Db55f7a2fAe07D56e1647899C3025CEf' },
+  { name: 'miner9', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x03f35db06529f78B99C1a405D3153D7Df87cb642' },
+  { name: 'miner10', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0xcb7efeB724a980E6c4493bD1b0A527E407560461' },
+  { name: 'miner11', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x1B71eDDa2607c4eB15d9116774c0C3D8fAF3f090' },
+  { name: 'miner12', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x88c483135fAD4a2FB46946F3225044E12Acf0A68' },
+  { name: 'miner13', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0xEAD6D012E5530a6287b9A85bBB5e2d55add79d26' },
+  { name: 'miner14', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x7b1a5efA12F53be548bb2400D6905c0a884Db590' },
+  { name: 'miner15', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xb1107E59E6628433Dd4ca33B7C495380dff54D0f' },
+  { name: 'miner16', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xbD4CE9f6F3f84b65A1c6e09E2cAc1f95fEAec54D' },
+  { name: 'miner17', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xa0c93250f1e8dA03beF26f5D96955ba0E01501fA' },
+  { name: 'miner-local-extra', role: 'miner', host: 'local', datasets: ['ds_wikipedia', 'ds_linkedin_company'], address: '0x605E8042b009Fbc54424A3d957948ba155a285d9' },
 ]
 
 const COLORS = {
@@ -76,6 +76,9 @@ export default function Home() {
   const [profiles, setProfiles] = useState({})
   const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(null)
+  const [hostFilter, setHostFilter] = useState('all')
+  const [roleFilter, setRoleFilter] = useState('all')
+  const [copied, setCopied] = useState('')
 
   const rows = useMemo(() => {
     return DEFAULT_WALLETS.map((wallet) => {
@@ -89,17 +92,25 @@ export default function Home() {
     })
   }, [profiles])
 
+  const filteredRows = useMemo(() => {
+    return rows.filter(({ wallet }) => {
+      const hostOk = hostFilter === 'all' || wallet.host === hostFilter
+      const roleOk = roleFilter === 'all' || wallet.role === roleFilter
+      return hostOk && roleOk
+    })
+  }, [rows, hostFilter, roleFilter])
+
   const totals = useMemo(() => {
-    const summaries = rows.map((x) => x.summary).filter(Boolean)
+    const summaries = filteredRows.map((x) => x.summary).filter(Boolean)
     return {
       running: summaries.filter((x) => x.online).length,
-      stopped: DEFAULT_WALLETS.length - summaries.filter((x) => x.online).length,
+      stopped: filteredRows.length - summaries.filter((x) => x.online).length,
       tasks: summaries.reduce((sum, x) => sum + (Number(x.taskCount) || 0), 0),
       rewards: summaries.reduce((sum, x) => sum + (Number(x.totalRewards) || 0), 0),
       avgScore: summaries.length ? summaries.reduce((sum, x) => sum + (Number(x.avgScore) || 0), 0) / summaries.length : 0,
       qualifiedEpochs: summaries.reduce((sum, x) => sum + (Number(x.qualifiedEpochs) || 0), 0),
     }
-  }, [rows])
+  }, [filteredRows])
 
   async function loadAll() {
     setLoading(true)
@@ -131,6 +142,14 @@ export default function Home() {
     setLoading(false)
   }
 
+  async function copyAddress(addr) {
+    try {
+      await navigator.clipboard.writeText(addr)
+      setCopied(addr)
+      setTimeout(() => setCopied(''), 1500)
+    } catch {}
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: `radial-gradient(circle at top left, rgba(103,232,249,0.10), transparent 25%), radial-gradient(circle at top right, rgba(167,139,250,0.12), transparent 22%), linear-gradient(180deg, ${COLORS.bg2} 0%, ${COLORS.bg} 100%)`, color: COLORS.text, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}>
       <div style={{ maxWidth: 1650, margin: '0 auto', padding: '30px 16px 50px' }}>
@@ -140,6 +159,7 @@ export default function Home() {
             .panels-grid { grid-template-columns: 1fr !important; }
             .desktop-table { display: none !important; }
             .mobile-cards { display: block !important; }
+            .top-controls { flex-direction: column !important; align-items: stretch !important; }
           }
           @media (min-width: 901px) {
             .mobile-cards { display: none !important; }
@@ -153,7 +173,7 @@ export default function Home() {
             </div>
             <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>Fleet Monitoring Dashboard</h1>
             <p style={{ color: COLORS.subtext, marginTop: 12, marginBottom: 0, maxWidth: 860, lineHeight: 1.6 }}>
-              Full wallet visibility, responsive layout for mobile, and cleaner fleet monitoring from one panel.
+              Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -164,6 +184,11 @@ export default function Home() {
               {lastUpdated ? `last sync :: ${lastUpdated.toLocaleString()}` : 'last sync :: never'}
             </div>
           </div>
+        </div>
+
+        <div className="top-controls" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+          <FilterBox label="HOST" value={hostFilter} onChange={setHostFilter} options={['all', '1387', '1691', 'local']} />
+          <FilterBox label="ROLE" value={roleFilter} onChange={setRoleFilter} options={['all', 'miner', 'validator']} />
         </div>
 
         <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -187,9 +212,9 @@ export default function Home() {
           </Panel>
           <Panel title="OPS NOTES">
             <div style={{ color: COLORS.subtext, fontSize: 13, lineHeight: 1.7 }}>
-              - Full wallet addresses are shown below.<br />
-              - Mobile view switches to stacked cards for readability.<br />
-              - No private keys, proxy credentials, or secrets are exposed.
+              - Tap/click COPY to grab a full wallet address.<br />
+              - Mobile switches to stacked cards automatically.<br />
+              - Dataset hints below are static ops labels, not secrets.
             </div>
           </Panel>
         </div>
@@ -198,25 +223,30 @@ export default function Home() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: COLORS.panelStrong }}>
-                {['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'CREDIT', 'TASKS', 'AVG SCORE', 'QUALIFIED', 'TOTAL REWARDS'].map((h) => (
+                {['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'DATASETS', 'CREDIT', 'TASKS', 'AVG SCORE', 'TOTAL REWARDS'].map((h) => (
                   <th key={h} style={{ padding: '14px 12px', textAlign: 'left', fontSize: 12, color: COLORS.subtext, letterSpacing: 1.2, borderBottom: `1px solid ${COLORS.border}` }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map(({ wallet, summary }) => {
+              {filteredRows.map(({ wallet, summary }) => {
                 const status = getStatus(summary)
                 return (
                   <tr key={wallet.address} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
-                    <td style={{ padding: 12, fontWeight: 700, color: COLORS.text }}>{wallet.name}</td>
+                    <td style={{ padding: 12, fontWeight: 700 }}>{wallet.name}</td>
                     <td style={{ padding: 12 }}><Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} /></td>
                     <td style={{ padding: 12, color: COLORS.subtext }}>{wallet.host}</td>
-                    <td style={{ padding: 12, color: COLORS.cyan, fontSize: 12, wordBreak: 'break-all', maxWidth: 320 }}>{wallet.address}</td>
+                    <td style={{ padding: 12, maxWidth: 360 }}>
+                      <div style={{ color: COLORS.cyan, fontSize: 12, wordBreak: 'break-all', marginBottom: 8 }}>{wallet.address}</div>
+                      <button onClick={() => copyAddress(wallet.address)} style={{ background: 'transparent', color: copied === wallet.address ? COLORS.green : COLORS.subtext, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: '6px 10px', fontSize: 11, cursor: 'pointer' }}>
+                        {copied === wallet.address ? 'COPIED' : 'COPY'}
+                      </button>
+                    </td>
                     <td style={{ padding: 12 }}><Badge color={status.color} text={status.label} /></td>
+                    <td style={{ padding: 12, color: COLORS.subtext, fontSize: 12 }}>{wallet.datasets.join(', ')}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.credit) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.taskCount, 0) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.avgScore) : '-'}</td>
-                    <td style={{ padding: 12 }}>{summary ? fmt(summary.qualifiedEpochs, 0) : '-'}</td>
                     <td style={{ padding: 12, color: COLORS.green }}>{summary ? fmt(summary.totalRewards) : '-'}</td>
                   </tr>
                 )
@@ -226,7 +256,7 @@ export default function Home() {
         </div>
 
         <div className="mobile-cards" style={{ display: 'none' }}>
-          {rows.map(({ wallet, summary }) => {
+          {filteredRows.map(({ wallet, summary }) => {
             const status = getStatus(summary)
             return (
               <div key={wallet.address} style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
@@ -238,7 +268,11 @@ export default function Home() {
                   <Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} />
                   <Badge color={COLORS.purple} text={`HOST ${wallet.host}`} />
                 </div>
-                <div style={{ color: COLORS.cyan, wordBreak: 'break-all', fontSize: 12, marginBottom: 12 }}>{wallet.address}</div>
+                <div style={{ color: COLORS.cyan, wordBreak: 'break-all', fontSize: 12, marginBottom: 10 }}>{wallet.address}</div>
+                <button onClick={() => copyAddress(wallet.address)} style={{ background: 'transparent', color: copied === wallet.address ? COLORS.green : COLORS.subtext, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: '6px 10px', fontSize: 11, cursor: 'pointer', marginBottom: 12 }}>
+                  {copied === wallet.address ? 'COPIED' : 'COPY ADDRESS'}
+                </button>
+                <div style={{ color: COLORS.subtext, fontSize: 12, marginBottom: 12 }}>Datasets: {wallet.datasets.join(', ')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 10, fontSize: 13 }}>
                   <SmallField label="Credit" value={summary ? fmt(summary.credit) : '-'} />
                   <SmallField label="Tasks" value={summary ? fmt(summary.taskCount, 0) : '-'} />
@@ -296,5 +330,16 @@ function SmallField({ label, value }) {
       <div style={{ color: COLORS.subtext, fontSize: 11, marginBottom: 6 }}>{label}</div>
       <div style={{ color: COLORS.text, fontWeight: 700 }}>{value}</div>
     </div>
+  )
+}
+
+function FilterBox({ label, value, onChange, options }) {
+  return (
+    <label style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '10px 12px', display: 'flex', flexDirection: 'column', minWidth: 160 }}>
+      <span style={{ color: COLORS.subtext, fontSize: 11, marginBottom: 6 }}>{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={{ background: 'transparent', color: COLORS.text, border: 0, outline: 'none', fontFamily: 'inherit' }}>
+        {options.map((opt) => <option key={opt} value={opt} style={{ color: 'black' }}>{opt}</option>)}
+      </select>
+    </label>
   )
 }
