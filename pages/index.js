@@ -20,52 +20,91 @@ const DEFAULT_WALLETS = [
   { name: 'miner15', role: 'miner', host: '1691', address: '0xb1107E59E6628433Dd4ca33B7C495380dff54D0f' },
   { name: 'miner16', role: 'miner', host: '1691', address: '0xbD4CE9f6F3f84b65A1c6e09E2cAc1f95fEAec54D' },
   { name: 'miner17', role: 'miner', host: '1691', address: '0xa0c93250f1e8dA03beF26f5D96955ba0E01501fA' },
-  { name: '1', role: 'miner', host: 'LOKAL', address: '0x605E8042b009Fbc54424A3d957948ba155a285d9' },
 ]
 
-function fmt(n) {
+const COLORS = {
+  bg: '#060914',
+  panel: '#0d1321',
+  panel2: '#121a2a',
+  border: '#1d2940',
+  text: '#e5eefc',
+  subtext: '#8fa3c7',
+  cyan: '#6ee7f9',
+  green: '#34d399',
+  yellow: '#fbbf24',
+  red: '#fb7185',
+  blue: '#60a5fa',
+}
+
+function fmt(n, digits = 2) {
   if (n == null || Number.isNaN(Number(n))) return '-'
-  return Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })
+  return Number(n).toLocaleString(undefined, { maximumFractionDigits: digits })
 }
 
 function short(addr) {
   return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '-'
 }
 
-function extractSummary(profile, history) {
+function extractSummary(profile, history, wallet) {
   const miner = profile?.miner || {}
+  const validator = profile?.validator || {}
   const currentEpochMiner = profile?.current_epoch?.miner || {}
+  const currentEpochValidator = profile?.current_epoch?.validator || {}
   const minerSummary = profile?.miner_summary || {}
-  const totalRewards = minerSummary?.total_rewards ?? history.reduce((sum, item) => sum + (Number(item.reward_amount) || 0), 0)
+  const validatorSummary = profile?.validator_summary || {}
+  const totalRewards = wallet.role === 'validator'
+    ? (validatorSummary?.total_rewards ?? 0)
+    : (minerSummary?.total_rewards ?? history.reduce((sum, item) => sum + (Number(item.reward_amount) || 0), 0))
   const qualifiedEpochs = history.filter((x) => x.qualified).length
+
   return {
-    credit: miner.credit ?? 0,
-    avgScore: currentEpochMiner.avg_score ?? 0,
-    taskCount: currentEpochMiner.task_count ?? 0,
-    online: Boolean(miner.online),
+    online: wallet.role === 'validator' ? Boolean(validator.online) : Boolean(miner.online),
+    credit: wallet.role === 'validator' ? (validator.credit ?? 0) : (miner.credit ?? 0),
+    taskCount: wallet.role === 'validator' ? (currentEpochValidator.eval_count ?? 0) : (currentEpochMiner.task_count ?? 0),
+    avgScore: wallet.role === 'validator' ? (currentEpochValidator.accuracy ?? 0) : (currentEpochMiner.avg_score ?? 0),
     totalRewards,
     qualifiedEpochs,
   }
 }
 
+function getStatus(summary) {
+  if (!summary) return { label: 'UNKNOWN', color: COLORS.yellow }
+  if (summary.online) return { label: 'RUNNING', color: COLORS.green }
+  return { label: 'STOPPED', color: COLORS.red }
+}
+
 export default function Home() {
   const [profiles, setProfiles] = useState({})
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [lastUpdated, setLastUpdated] = useState(null)
+
+  const rows = useMemo(() => {
+    return DEFAULT_WALLETS.map((wallet) => {
+      const row = profiles[wallet.address]
+      return {
+        wallet,
+        profile: row?.profile || null,
+        history: row?.history || [],
+        summary: row?.summary || null,
+        error: row?.error || null,
+      }
+    })
+  }, [profiles])
 
   const totals = useMemo(() => {
-    const values = Object.values(profiles)
+    const summaries = rows.map((x) => x.summary).filter(Boolean)
     return {
-      loaded: values.length,
-      online: values.filter((x) => x.summary?.online).length,
-      totalRewards: values.reduce((sum, x) => sum + (Number(x.summary?.totalRewards) || 0), 0),
-      totalTasks: values.reduce((sum, x) => sum + (Number(x.summary?.taskCount) || 0), 0),
+      running: summaries.filter((x) => x.online).length,
+      stopped: DEFAULT_WALLETS.length - summaries.filter((x) => x.online).length,
+      tasks: summaries.reduce((sum, x) => sum + (Number(x.taskCount) || 0), 0),
+      rewards: summaries.reduce((sum, x) => sum + (Number(x.totalRewards) || 0), 0),
+      avgScore: summaries.length ? summaries.reduce((sum, x) => sum + (Number(x.avgScore) || 0), 0) / summaries.length : 0,
+      qualifiedEpochs: summaries.reduce((sum, x) => sum + (Number(x.qualifiedEpochs) || 0), 0),
     }
-  }, [profiles])
+  }, [rows])
 
   async function loadAll() {
     setLoading(true)
-    setError('')
     const next = {}
     for (const wallet of DEFAULT_WALLETS) {
       try {
@@ -77,7 +116,7 @@ export default function Home() {
           wallet,
           profile,
           history,
-          summary: extractSummary(profile, history),
+          summary: extractSummary(profile, history, wallet),
         }
       } catch (e) {
         next[wallet.address] = {
@@ -90,75 +129,128 @@ export default function Home() {
       }
     }
     setProfiles(next)
+    setLastUpdated(new Date())
     setLoading(false)
   }
 
   return (
-    <div style={{ background: '#0b0f19', minHeight: '100vh', color: '#e5e7eb', fontFamily: 'Inter, Arial, sans-serif' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: 24 }}>
-        <h1 style={{ fontSize: 32, marginBottom: 8 }}>MineWork Ops Dashboard</h1>
-        <p style={{ color: '#94a3b8', marginBottom: 20 }}>Wallet overview based on MineWork rewards lookup data</p>
-
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-          <button onClick={loadAll} disabled={loading} style={{ background: '#2563eb', color: 'white', border: 0, borderRadius: 10, padding: '10px 16px', cursor: 'pointer' }}>
-            {loading ? 'Loading...' : 'Refresh all wallets'}
-          </button>
+    <div style={{ minHeight: '100vh', background: `radial-gradient(circle at top left, #13203c 0%, ${COLORS.bg} 45%)`, color: COLORS.text, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}>
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '28px 20px 40px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+          <div>
+            <div style={{ color: COLORS.cyan, fontSize: 13, letterSpacing: 2, marginBottom: 10 }}>MINEWORK / OPS / DASHBOARD</div>
+            <h1 style={{ margin: 0, fontSize: 34, lineHeight: 1.1 }}>Fleet Overview</h1>
+            <p style={{ color: COLORS.subtext, marginTop: 10, marginBottom: 0, maxWidth: 820 }}>
+              Overview of validator + miner wallets using MineWork rewards lookup. Good for quick visibility before you open the deeper logs on your servers.
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <button onClick={loadAll} disabled={loading} style={{ background: loading ? '#1e3a5f' : '#1d4ed8', color: 'white', border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer' }}>
+              {loading ? 'Refreshing...' : 'Refresh all'}
+            </button>
+            <div style={{ color: COLORS.subtext, fontSize: 12 }}>
+              {lastUpdated ? `Last updated: ${lastUpdated.toLocaleString()}` : 'Not loaded yet'}
+            </div>
+          </div>
         </div>
 
-        {error ? <div style={{ color: '#fca5a5', marginBottom: 12 }}>{error}</div> : null}
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 12, marginBottom: 24 }}>
-          <StatCard label="Wallets loaded" value={totals.loaded} />
-          <StatCard label="Online miners" value={totals.online} />
-          <StatCard label="Current epoch tasks" value={fmt(totals.totalTasks)} />
-          <StatCard label="Total rewards" value={fmt(totals.totalRewards)} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+          <MetricCard label="RUNNING" value={fmt(totals.running, 0)} color={COLORS.green} />
+          <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.yellow} />
+          <MetricCard label="TASKS" value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
+          <MetricCard label="QUALIFIED" value={fmt(totals.qualifiedEpochs, 0)} color={COLORS.blue} />
+          <MetricCard label="REWARDS" value={fmt(totals.rewards)} color={COLORS.green} />
+          <MetricCard label="AVG SCORE" value={fmt(totals.avgScore)} color={COLORS.cyan} />
         </div>
 
-        <div style={{ overflowX: 'auto', background: '#111827', borderRadius: 16, border: '1px solid #1f2937' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
+          <Panel title="Hosts">
+            <HostLine host="1387" count={rows.filter((r) => r.wallet.host === '1387').length} />
+            <HostLine host="1691" count={rows.filter((r) => r.wallet.host === '1691').length} />
+          </Panel>
+          <Panel title="Roles">
+            <HostLine host="miners" count={rows.filter((r) => r.wallet.role === 'miner').length} />
+            <HostLine host="validators" count={rows.filter((r) => r.wallet.role === 'validator').length} />
+          </Panel>
+          <Panel title="Quick Notes">
+            <div style={{ color: COLORS.subtext, fontSize: 13, lineHeight: 1.7 }}>
+              - Rewards and task counts come from the MineWork lookup page.<br />
+              - This UI does not expose private keys or proxy credentials.<br />
+              - For process-level health, still use server-side logs and status scripts.
+            </div>
+          </Panel>
+        </div>
+
+        <div style={{ overflowX: 'auto', background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: '0 10px 40px rgba(0,0,0,0.25)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#0f172a', textAlign: 'left' }}>
-                {['Name', 'Role', 'Host', 'Wallet', 'Online', 'Credit', 'Epoch Tasks', 'Avg Score', 'Qualified Epochs', 'Total Rewards'].map((h) => (
-                  <th key={h} style={{ padding: 12, fontSize: 13, color: '#93c5fd', borderBottom: '1px solid #1f2937' }}>{h}</th>
+              <tr style={{ background: COLORS.panel2 }}>
+                {['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'CREDIT', 'TASKS', 'AVG SCORE', 'QUALIFIED', 'TOTAL REWARDS'].map((h) => (
+                  <th key={h} style={{ padding: '14px 12px', textAlign: 'left', fontSize: 12, color: COLORS.subtext, letterSpacing: 1, borderBottom: `1px solid ${COLORS.border}` }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {DEFAULT_WALLETS.map((wallet) => {
-                const row = profiles[wallet.address]
-                const summary = row?.summary
+              {rows.map(({ wallet, summary, error }) => {
+                const status = getStatus(summary)
                 return (
-                  <tr key={wallet.address} style={{ borderBottom: '1px solid #1f2937' }}>
-                    <td style={{ padding: 12 }}>{wallet.name}</td>
-                    <td style={{ padding: 12 }}>{wallet.role}</td>
+                  <tr key={wallet.address} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+                    <td style={{ padding: 12, fontWeight: 700 }}>{wallet.name}</td>
+                    <td style={{ padding: 12 }}>
+                      <Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} />
+                    </td>
                     <td style={{ padding: 12 }}>{wallet.host}</td>
-                    <td style={{ padding: 12, fontFamily: 'monospace' }}>{short(wallet.address)}</td>
-                    <td style={{ padding: 12 }}>{summary ? (summary.online ? 'Yes' : 'No') : '-'}</td>
+                    <td style={{ padding: 12, color: COLORS.cyan }}>{short(wallet.address)}</td>
+                    <td style={{ padding: 12 }}>
+                      <Badge color={status.color} text={status.label} />
+                    </td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.credit) : '-'}</td>
-                    <td style={{ padding: 12 }}>{summary ? fmt(summary.taskCount) : '-'}</td>
+                    <td style={{ padding: 12 }}>{summary ? fmt(summary.taskCount, 0) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.avgScore) : '-'}</td>
-                    <td style={{ padding: 12 }}>{summary ? fmt(summary.qualifiedEpochs) : '-'}</td>
-                    <td style={{ padding: 12 }}>{summary ? fmt(summary.totalRewards) : '-'}</td>
+                    <td style={{ padding: 12 }}>{summary ? fmt(summary.qualifiedEpochs, 0) : '-'}</td>
+                    <td style={{ padding: 12, color: COLORS.green }}>{summary ? fmt(summary.totalRewards) : '-'}</td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
         </div>
-
-        <p style={{ marginTop: 18, color: '#64748b', fontSize: 13 }}>
-          Data source: minework.net rewards lookup endpoint proxy via /api/mine-profile. This dashboard is front-end only and Vercel-friendly.
-        </p>
       </div>
     </div>
   )
 }
 
-function StatCard({ label, value }) {
+function MetricCard({ label, value, color }) {
   return (
-    <div style={{ background: '#111827', border: '1px solid #1f2937', borderRadius: 16, padding: 16 }}>
-      <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 700 }}>{value}</div>
+    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16 }}>
+      <div style={{ color: COLORS.subtext, fontSize: 12, letterSpacing: 1, marginBottom: 10 }}>{label}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, color }}>{value}</div>
     </div>
+  )
+}
+
+function Panel({ title, children }) {
+  return (
+    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16 }}>
+      <div style={{ color: COLORS.cyan, fontSize: 13, marginBottom: 12 }}>{title}</div>
+      {children}
+    </div>
+  )
+}
+
+function HostLine({ host, count }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', color: COLORS.text }}>
+      <span style={{ textTransform: 'uppercase', color: COLORS.subtext }}>{host}</span>
+      <strong>{count}</strong>
+    </div>
+  )
+}
+
+function Badge({ text, color }) {
+  return (
+    <span style={{ display: 'inline-block', padding: '6px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.03)', border: `1px solid ${color}`, color, fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
+      {text}
+    </span>
   )
 }
