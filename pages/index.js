@@ -23,17 +23,19 @@ const DEFAULT_WALLETS = [
 ]
 
 const COLORS = {
-  bg: '#060914',
-  panel: '#0d1321',
-  panel2: '#121a2a',
-  border: '#1d2940',
-  text: '#e5eefc',
-  subtext: '#8fa3c7',
-  cyan: '#6ee7f9',
-  green: '#34d399',
-  yellow: '#fbbf24',
+  bg: '#03060d',
+  bg2: '#090d18',
+  panel: 'rgba(10, 18, 32, 0.82)',
+  panelStrong: 'rgba(12, 22, 40, 0.94)',
+  border: 'rgba(94, 234, 212, 0.18)',
+  text: '#e6f7ff',
+  subtext: '#87a3c3',
+  cyan: '#67e8f9',
+  green: '#4ade80',
+  yellow: '#facc15',
   red: '#fb7185',
   blue: '#60a5fa',
+  purple: '#a78bfa',
 }
 
 function fmt(n, digits = 2) {
@@ -134,22 +136,24 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: `radial-gradient(circle at top left, #13203c 0%, ${COLORS.bg} 45%)`, color: COLORS.text, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}>
-      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '28px 20px 40px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+    <div style={{ minHeight: '100vh', background: `radial-gradient(circle at top left, rgba(103,232,249,0.10), transparent 25%), radial-gradient(circle at top right, rgba(167,139,250,0.12), transparent 22%), linear-gradient(180deg, ${COLORS.bg2} 0%, ${COLORS.bg} 100%)`, color: COLORS.text, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}>
+      <div style={{ maxWidth: 1650, margin: '0 auto', padding: '30px 20px 50px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 26 }}>
           <div>
-            <div style={{ color: COLORS.cyan, fontSize: 13, letterSpacing: 2, marginBottom: 10 }}>MINEWORK / OPS / DASHBOARD</div>
-            <h1 style={{ margin: 0, fontSize: 34, lineHeight: 1.1 }}>Fleet Overview</h1>
-            <p style={{ color: COLORS.subtext, marginTop: 10, marginBottom: 0, maxWidth: 820 }}>
-              Overview of validator + miner wallets using MineWork rewards lookup. Good for quick visibility before you open the deeper logs on your servers.
+            <div style={{ color: COLORS.green, fontSize: 13, letterSpacing: 3, marginBottom: 10, textTransform: 'uppercase' }}>
+              &gt;_ minework // cyber ops console
+            </div>
+            <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>Fleet Monitoring Dashboard</h1>
+            <p style={{ color: COLORS.subtext, marginTop: 12, marginBottom: 0, maxWidth: 860, lineHeight: 1.6 }}>
+              Live wallet lookup view for validator + miner fleet. Optimized for quick scanning, terminal vibes, and late-night ops checks.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <button onClick={loadAll} disabled={loading} style={{ background: loading ? '#1e3a5f' : '#1d4ed8', color: 'white', border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer' }}>
-              {loading ? 'Refreshing...' : 'Refresh all'}
+            <button onClick={loadAll} disabled={loading} style={{ background: loading ? '#12304a' : '#0f766e', color: 'white', border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 0 24px rgba(20,184,166,0.18)' }}>
+              {loading ? 'SYNCING...' : 'REFRESH ALL'}
             </button>
             <div style={{ color: COLORS.subtext, fontSize: 12 }}>
-              {lastUpdated ? `Last updated: ${lastUpdated.toLocaleString()}` : 'Not loaded yet'}
+              {lastUpdated ? `last sync :: ${lastUpdated.toLocaleString()}` : 'last sync :: never'}
             </div>
           </div>
         </div>
@@ -158,48 +162,48 @@ export default function Home() {
           <MetricCard label="RUNNING" value={fmt(totals.running, 0)} color={COLORS.green} />
           <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.yellow} />
           <MetricCard label="TASKS" value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
-          <MetricCard label="QUALIFIED" value={fmt(totals.qualifiedEpochs, 0)} color={COLORS.blue} />
+          <MetricCard label="QUALIFIED" value={fmt(totals.qualifiedEpochs, 0)} color={COLORS.purple} />
           <MetricCard label="REWARDS" value={fmt(totals.rewards)} color={COLORS.green} />
           <MetricCard label="AVG SCORE" value={fmt(totals.avgScore)} color={COLORS.cyan} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
-          <Panel title="Hosts">
+          <Panel title="HOST MAP">
             <HostLine host="1387" count={rows.filter((r) => r.wallet.host === '1387').length} />
             <HostLine host="1691" count={rows.filter((r) => r.wallet.host === '1691').length} />
           </Panel>
-          <Panel title="Roles">
+          <Panel title="ROLE SPLIT">
             <HostLine host="miners" count={rows.filter((r) => r.wallet.role === 'miner').length} />
             <HostLine host="validators" count={rows.filter((r) => r.wallet.role === 'validator').length} />
           </Panel>
-          <Panel title="Quick Notes">
+          <Panel title="OPS NOTES">
             <div style={{ color: COLORS.subtext, fontSize: 13, lineHeight: 1.7 }}>
-              - Rewards and task counts come from the MineWork lookup page.<br />
-              - This UI does not expose private keys or proxy credentials.<br />
-              - For process-level health, still use server-side logs and status scripts.
+              - Public wallet-only dashboard, no secrets exposed.<br />
+              - Rewards/task data comes from MineWork wallet lookup.<br />
+              - Use VPS scripts for process-level control and proxy checks.
             </div>
           </Panel>
         </div>
 
-        <div style={{ overflowX: 'auto', background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: '0 10px 40px rgba(0,0,0,0.25)' }}>
+        <div style={{ overflowX: 'auto', background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 18, boxShadow: '0 10px 50px rgba(0,0,0,0.35), inset 0 0 40px rgba(96,165,250,0.04)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: COLORS.panel2 }}>
+              <tr style={{ background: COLORS.panelStrong }}>
                 {['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'CREDIT', 'TASKS', 'AVG SCORE', 'QUALIFIED', 'TOTAL REWARDS'].map((h) => (
-                  <th key={h} style={{ padding: '14px 12px', textAlign: 'left', fontSize: 12, color: COLORS.subtext, letterSpacing: 1, borderBottom: `1px solid ${COLORS.border}` }}>{h}</th>
+                  <th key={h} style={{ padding: '14px 12px', textAlign: 'left', fontSize: 12, color: COLORS.subtext, letterSpacing: 1.2, borderBottom: `1px solid ${COLORS.border}` }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map(({ wallet, summary, error }) => {
+              {rows.map(({ wallet, summary }) => {
                 const status = getStatus(summary)
                 return (
                   <tr key={wallet.address} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
-                    <td style={{ padding: 12, fontWeight: 700 }}>{wallet.name}</td>
+                    <td style={{ padding: 12, fontWeight: 700, color: COLORS.text }}>{wallet.name}</td>
                     <td style={{ padding: 12 }}>
                       <Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} />
                     </td>
-                    <td style={{ padding: 12 }}>{wallet.host}</td>
+                    <td style={{ padding: 12, color: COLORS.subtext }}>{wallet.host}</td>
                     <td style={{ padding: 12, color: COLORS.cyan }}>{short(wallet.address)}</td>
                     <td style={{ padding: 12 }}>
                       <Badge color={status.color} text={status.label} />
@@ -222,17 +226,17 @@ export default function Home() {
 
 function MetricCard({ label, value, color }) {
   return (
-    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16 }}>
-      <div style={{ color: COLORS.subtext, fontSize: 12, letterSpacing: 1, marginBottom: 10 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, color }}>{value}</div>
+    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, boxShadow: 'inset 0 0 30px rgba(103,232,249,0.03)' }}>
+      <div style={{ color: COLORS.subtext, fontSize: 12, letterSpacing: 1.4, marginBottom: 10 }}>{label}</div>
+      <div style={{ fontSize: 30, fontWeight: 800, color, textShadow: `0 0 18px ${color}33` }}>{value}</div>
     </div>
   )
 }
 
 function Panel({ title, children }) {
   return (
-    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16 }}>
-      <div style={{ color: COLORS.cyan, fontSize: 13, marginBottom: 12 }}>{title}</div>
+    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 16, boxShadow: 'inset 0 0 30px rgba(167,139,250,0.04)' }}>
+      <div style={{ color: COLORS.cyan, fontSize: 13, marginBottom: 12, letterSpacing: 1.4 }}>{title}</div>
       {children}
     </div>
   )
@@ -242,7 +246,7 @@ function HostLine({ host, count }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', color: COLORS.text }}>
       <span style={{ textTransform: 'uppercase', color: COLORS.subtext }}>{host}</span>
-      <strong>{count}</strong>
+      <strong style={{ color: COLORS.text }}>{count}</strong>
     </div>
   )
 }
