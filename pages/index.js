@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-const DEFAULT_WALLETS = [
+const MINE_WALLETS = [
   { name: 'validator-0001', role: 'validator', host: '1387', datasets: ['validator'], address: '0x0001A97906Ac0a12E6F97eba3c3C4a44399614c4' },
   { name: 'miner1387', role: 'miner', host: '1387', datasets: ['ds_arxiv'], address: '0x9e3278Dc6A10B54ED08296F999a9e214edf4164a' },
   { name: 'miner1', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x1410e83a725DE68494AC6f4c4F8c91a0c821Af1d' },
@@ -21,6 +21,19 @@ const DEFAULT_WALLETS = [
   { name: 'miner16', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0xbD4CE9f6F3f84b65A1c6e09E2cAc1f95fEAec54D' },
   { name: 'miner17', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0xa0c93250f1e8dA03beF26f5D96955ba0E01501fA' },
   { name: 'miner-local-extra', role: 'miner', host: 'local', datasets: ['ds_wikipedia', 'ds_linkedin_company'], address: '0x605E8042b009Fbc54424A3d957948ba155a285d9' },
+]
+
+const PREDICT_WALLETS = [
+  { name: 'predict1', role: 'predict', host: '1691', datasets: ['persona: chartist'], address: '0x8d3EB4AC0c33d03de6d4342d158f9Aaa75ed1D73' },
+  { name: 'predict2', role: 'predict', host: '1691', datasets: ['persona: macro'], address: '0x301926AAeC232EBeb6d2919E1A87E0f9351f082E' },
+  { name: 'predict3', role: 'predict', host: '1691', datasets: ['persona: sentiment'], address: '0xEF68BF14A49E11d153D9d2D975Db6bA6E81fe778' },
+  { name: 'predict4', role: 'predict', host: '1691', datasets: ['persona: contrarian'], address: '0x8CDB337C54C03826B342b362102226B28365473f' },
+  { name: 'predict5', role: 'predict', host: '1691', datasets: ['persona: degen'], address: '0x4D5C37ffbF149E03186776C381b14516E0eF6c66' },
+  { name: 'predict6', role: 'predict', host: '1691', datasets: ['persona: conservative'], address: '0x95800cc443e613C0f8F11f2377070B969C449C8a' },
+  { name: 'predict7', role: 'predict', host: '1691', datasets: ['persona: sniper'], address: '0x3357661EE6548a3ff5BDCBdD995E8C91EcDF585a' },
+  { name: 'predict8', role: 'predict', host: '1691', datasets: ['persona: chartist'], address: '0x5107100D36E54dD28BEbB732621d8521A2A16181' },
+  { name: 'predict9', role: 'predict', host: '1691', datasets: ['persona: macro'], address: '0xee9A8E4D5B3D2773964290F618119F29B92Adc9d' },
+  { name: 'predict10', role: 'predict', host: '1691', datasets: ['persona: sentiment'], address: '0x73E29f56Bd9ecD82c2A70DF90E109e5B44B44441' },
 ]
 
 const COLORS = {
@@ -44,7 +57,29 @@ function fmt(n, digits = 2) {
   return Number(n).toLocaleString(undefined, { maximumFractionDigits: digits })
 }
 
-function extractSummary(profile, history, wallet) {
+function extractSummary(profile, history, wallet, extras = {}) {
+  if (wallet.role === 'predict') {
+    const stats = profile?.stats || {}
+    const today = profile?.today || {}
+    const epoch = extras?.epoch || {}
+    const equity = extras?.equity || {}
+
+    return {
+      online: Number(today.balance ?? 0) > 0,
+      credit: Number(today.balance ?? 0),
+      taskCount: Number(today.submissions ?? stats.total_submissions ?? 0),
+      avgScore: Number(today.accuracy ?? stats.accuracy ?? 0),
+      totalRewards: Number(today.estimated_reward ?? stats.total_earned ?? 0),
+      qualifiedEpochs: Number(today.correct ?? stats.correct ?? 0),
+      resolved: Number(today.resolved ?? stats.total_resolved ?? 0),
+      excess: Number(today.excess ?? stats.net_chips ?? 0),
+      rank: Number(stats.rank ?? 0),
+      pnl: Number(equity.final_pnl ?? 0),
+      currentEpochPredictions: Number(epoch.predictions_today ?? 0),
+      marketsResolved: Number(epoch.markets_resolved ?? 0),
+    }
+  }
+
   const miner = profile?.miner || {}
   const validator = profile?.validator || {}
   const currentEpochMiner = profile?.current_epoch?.miner || {}
@@ -79,9 +114,12 @@ export default function Home() {
   const [hostFilter, setHostFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState('all')
   const [copied, setCopied] = useState('')
+  const [viewMode, setViewMode] = useState('mine')
+
+  const activeWallets = viewMode === 'predict' ? PREDICT_WALLETS : MINE_WALLETS
 
   const rows = useMemo(() => {
-    return DEFAULT_WALLETS.map((wallet) => {
+    return activeWallets.map((wallet) => {
       const row = profiles[wallet.address]
       return {
         wallet,
@@ -90,7 +128,7 @@ export default function Home() {
         summary: row?.summary || null,
       }
     })
-  }, [profiles])
+  }, [profiles, activeWallets])
 
   const filteredRows = useMemo(() => {
     return rows.filter(({ wallet }) => {
@@ -99,6 +137,9 @@ export default function Home() {
       return hostOk && roleOk
     })
   }, [rows, hostFilter, roleFilter])
+
+  const hostOptions = useMemo(() => ['all', ...Array.from(new Set(activeWallets.map((wallet) => wallet.host)))], [activeWallets])
+  const roleOptions = useMemo(() => ['all', ...Array.from(new Set(activeWallets.map((wallet) => wallet.role)))], [activeWallets])
 
   const totals = useMemo(() => {
     const summaries = filteredRows.map((x) => x.summary).filter(Boolean)
@@ -115,17 +156,22 @@ export default function Home() {
   async function loadAll() {
     setLoading(true)
     const next = {}
-    for (const wallet of DEFAULT_WALLETS) {
+    for (const wallet of activeWallets) {
       try {
-        const res = await fetch(`/api/mine-profile?address=${wallet.address}`)
+        const endpoint = wallet.role === 'predict' ? 'predict-profile' : 'mine-profile'
+        const res = await fetch(`/api/${endpoint}?address=${wallet.address}`)
         const json = await res.json()
         const profile = json.profile || null
         const history = json.history || []
+        const extras = {
+          equity: json.equity || null,
+          epoch: json.epoch || null,
+        }
         next[wallet.address] = {
           wallet,
           profile,
           history,
-          summary: extractSummary(profile, history, wallet),
+          summary: extractSummary(profile, history, wallet, extras),
         }
       } catch (e) {
         next[wallet.address] = {
@@ -150,6 +196,14 @@ export default function Home() {
     } catch {}
   }
 
+  function switchView(nextView) {
+    setViewMode(nextView)
+    setProfiles({})
+    setHostFilter('all')
+    setRoleFilter('all')
+    setLastUpdated(null)
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: `radial-gradient(circle at top left, rgba(103,232,249,0.10), transparent 25%), radial-gradient(circle at top right, rgba(167,139,250,0.12), transparent 22%), linear-gradient(180deg, ${COLORS.bg2} 0%, ${COLORS.bg} 100%)`, color: COLORS.text, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}>
       <div style={{ maxWidth: 1650, margin: '0 auto', padding: '30px 16px 50px' }}>
@@ -169,11 +223,15 @@ export default function Home() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 26 }}>
           <div>
             <div style={{ color: COLORS.green, fontSize: 13, letterSpacing: 3, marginBottom: 10, textTransform: 'uppercase' }}>
-              &gt;_ minework // cyber ops console
+              &gt;_ {viewMode === 'predict' ? 'predict worknet' : 'minework'} // cyber ops console
             </div>
-            <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>Fleet Monitoring Dashboard</h1>
+            <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>
+              {viewMode === 'predict' ? 'Predict Fleet Dashboard' : 'Fleet Monitoring Dashboard'}
+            </h1>
             <p style={{ color: COLORS.subtext, marginTop: 12, marginBottom: 0, maxWidth: 860, lineHeight: 1.6 }}>
-              Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.
+              {viewMode === 'predict'
+                ? 'Separate view for Predict wallets with persona labels, wallet visibility, and quick ops refresh.'
+                : 'Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.'}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -187,34 +245,36 @@ export default function Home() {
         </div>
 
         <div className="top-controls" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
-          <FilterBox label="HOST" value={hostFilter} onChange={setHostFilter} options={['all', '1387', '1691', 'local']} />
-          <FilterBox label="ROLE" value={roleFilter} onChange={setRoleFilter} options={['all', 'miner', 'validator']} />
+          <ViewToggle value={viewMode} onChange={switchView} />
+          <FilterBox label="HOST" value={hostFilter} onChange={setHostFilter} options={hostOptions} />
+          <FilterBox label="ROLE" value={roleFilter} onChange={setRoleFilter} options={roleOptions} />
         </div>
 
         <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
           <MetricCard label="RUNNING" value={fmt(totals.running, 0)} color={COLORS.green} />
           <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.yellow} />
-          <MetricCard label="TASKS" value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
-          <MetricCard label="QUALIFIED" value={fmt(totals.qualifiedEpochs, 0)} color={COLORS.purple} />
-          <MetricCard label="REWARDS" value={fmt(totals.rewards)} color={COLORS.green} />
-          <MetricCard label="AVG SCORE" value={fmt(totals.avgScore)} color={COLORS.cyan} />
+          <MetricCard label={viewMode === 'predict' ? 'SUBMISSIONS' : 'TASKS'} value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
+          <MetricCard label={viewMode === 'predict' ? 'CORRECT' : 'QUALIFIED'} value={fmt(totals.qualifiedEpochs, 0)} color={COLORS.purple} />
+          <MetricCard label={viewMode === 'predict' ? 'EST. REWARD' : 'REWARDS'} value={fmt(totals.rewards)} color={COLORS.green} />
+          <MetricCard label={viewMode === 'predict' ? 'ACCURACY' : 'AVG SCORE'} value={fmt(totals.avgScore)} color={COLORS.cyan} />
         </div>
 
         <div className="panels-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
           <Panel title="HOST MAP">
-            <HostLine host="1387" count={rows.filter((r) => r.wallet.host === '1387').length} />
-            <HostLine host="1691" count={rows.filter((r) => r.wallet.host === '1691').length} />
-            <HostLine host="local" count={rows.filter((r) => r.wallet.host === 'local').length} />
+            {hostOptions.filter((host) => host !== 'all').map((host) => (
+              <HostLine key={host} host={host} count={rows.filter((r) => r.wallet.host === host).length} />
+            ))}
           </Panel>
           <Panel title="ROLE SPLIT">
-            <HostLine host="miners" count={rows.filter((r) => r.wallet.role === 'miner').length} />
-            <HostLine host="validators" count={rows.filter((r) => r.wallet.role === 'validator').length} />
+            {roleOptions.filter((role) => role !== 'all').map((role) => (
+              <HostLine key={role} host={role} count={rows.filter((r) => r.wallet.role === role).length} />
+            ))}
           </Panel>
           <Panel title="OPS NOTES">
             <div style={{ color: COLORS.subtext, fontSize: 13, lineHeight: 1.7 }}>
               - Tap/click COPY to grab a full wallet address.<br />
               - Mobile switches to stacked cards automatically.<br />
-              - Dataset hints below are static ops labels, not secrets.
+              - {viewMode === 'predict' ? 'Persona hints below are static ops labels for predict wallets.' : 'Dataset hints below are static ops labels, not secrets.'}
             </div>
           </Panel>
         </div>
@@ -223,7 +283,10 @@ export default function Home() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: COLORS.panelStrong }}>
-                {['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'DATASETS', 'CREDIT', 'TASKS', 'AVG SCORE', 'TOTAL REWARDS'].map((h) => (
+                {(viewMode === 'predict'
+                  ? ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'PERSONA', 'BALANCE', 'SUBMITS', 'ACCURACY', 'EST. REWARD']
+                  : ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'DATASETS', 'CREDIT', 'TASKS', 'AVG SCORE', 'TOTAL REWARDS']
+                ).map((h) => (
                   <th key={h} style={{ padding: '14px 12px', textAlign: 'left', fontSize: 12, color: COLORS.subtext, letterSpacing: 1.2, borderBottom: `1px solid ${COLORS.border}` }}>{h}</th>
                 ))}
               </tr>
@@ -234,7 +297,7 @@ export default function Home() {
                 return (
                   <tr key={wallet.address} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
                     <td style={{ padding: 12, fontWeight: 700 }}>{wallet.name}</td>
-                    <td style={{ padding: 12 }}><Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} /></td>
+                    <td style={{ padding: 12 }}><Badge color={wallet.role === 'validator' ? COLORS.yellow : wallet.role === 'predict' ? COLORS.purple : COLORS.blue} text={wallet.role.toUpperCase()} /></td>
                     <td style={{ padding: 12, color: COLORS.subtext }}>{wallet.host}</td>
                     <td style={{ padding: 12, maxWidth: 360 }}>
                       <div style={{ color: COLORS.cyan, fontSize: 12, wordBreak: 'break-all', marginBottom: 8 }}>{wallet.address}</div>
@@ -265,7 +328,7 @@ export default function Home() {
                   <Badge color={status.color} text={status.label} />
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-                  <Badge color={wallet.role === 'validator' ? COLORS.yellow : COLORS.blue} text={wallet.role.toUpperCase()} />
+                  <Badge color={wallet.role === 'validator' ? COLORS.yellow : wallet.role === 'predict' ? COLORS.purple : COLORS.blue} text={wallet.role.toUpperCase()} />
                   <Badge color={COLORS.purple} text={`HOST ${wallet.host}`} />
                 </div>
                 <div style={{ color: COLORS.cyan, wordBreak: 'break-all', fontSize: 12, marginBottom: 10 }}>{wallet.address}</div>
@@ -329,6 +392,43 @@ function SmallField({ label, value }) {
     <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: 10 }}>
       <div style={{ color: COLORS.subtext, fontSize: 11, marginBottom: 6 }}>{label}</div>
       <div style={{ color: COLORS.text, fontWeight: 700 }}>{value}</div>
+    </div>
+  )
+}
+
+function ViewToggle({ value, onChange }) {
+  const options = [
+    { value: 'mine', label: 'MINE' },
+    { value: 'predict', label: 'PREDICT' },
+  ]
+
+  return (
+    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '10px 12px', display: 'flex', flexDirection: 'column', minWidth: 180 }}>
+      <span style={{ color: COLORS.subtext, fontSize: 11, marginBottom: 8 }}>VIEW</span>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {options.map((opt) => {
+          const active = value === opt.value
+          return (
+            <button
+              key={opt.value}
+              onClick={() => onChange(opt.value)}
+              style={{
+                background: active ? 'rgba(103,232,249,0.16)' : 'transparent',
+                color: active ? COLORS.cyan : COLORS.subtext,
+                border: `1px solid ${active ? COLORS.cyan : COLORS.border}`,
+                borderRadius: 10,
+                padding: '8px 12px',
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: 'pointer',
+                letterSpacing: 1,
+              }}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
