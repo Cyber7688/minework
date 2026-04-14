@@ -12,6 +12,7 @@ const MINE_WALLETS = [
   { name: 'miner7', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x5451Cc662D5D2aC93694ba49811Bc58121A8784a' },
   { name: 'miner8', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x4508cca9Db55f7a2fAe07D56e1647899C3025CEf' },
   { name: 'miner9', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x03f35db06529f78B99C1a405D3153D7Df87cb642' },
+  { name: 'validator1691', role: 'validator', host: '1691', datasets: ['validator'], address: '0xC4DC724860CB900816a378F1595f31B0Ee792FA9' },
   { name: 'miner10', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xcb7efeB724a980E6c4493bD1b0A527E407560461' },
   { name: 'miner11', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x1B71eDDa2607c4eB15d9116774c0C3D8fAF3f090' },
   { name: 'miner12', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x88c483135fAD4a2FB46946F3225044E12Acf0A68' },
