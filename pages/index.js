@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 const MINE_WALLETS = [
   { name: 'validator-0001', role: 'validator', host: '1387', datasets: ['validator'], address: '0x0001A97906Ac0a12E6F97eba3c3C4a44399614c4' },
@@ -137,6 +137,7 @@ export default function Home() {
   const [roleFilter, setRoleFilter] = useState('all')
   const [copied, setCopied] = useState('')
   const [viewMode, setViewMode] = useState('mine')
+  const [autoRefresh, setAutoRefresh] = useState(true)
 
   const activeWallets = viewMode === 'predict' ? PREDICT_WALLETS : MINE_WALLETS
 
@@ -218,6 +219,18 @@ export default function Home() {
     } catch {}
   }
 
+  useEffect(() => {
+    loadAll()
+  }, [viewMode])
+
+  useEffect(() => {
+    if (!autoRefresh) return undefined
+    const id = setInterval(() => {
+      loadAll()
+    }, 60000)
+    return () => clearInterval(id)
+  }, [autoRefresh, viewMode])
+
   function switchView(nextView) {
     setViewMode(nextView)
     setProfiles({})
@@ -268,6 +281,7 @@ export default function Home() {
 
         <div className="top-controls" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
           <ViewToggle value={viewMode} onChange={switchView} />
+          <AutoRefreshToggle value={autoRefresh} onChange={setAutoRefresh} />
           <FilterBox label="HOST" value={hostFilter} onChange={setHostFilter} options={hostOptions} />
           <FilterBox label="ROLE" value={roleFilter} onChange={setRoleFilter} options={roleOptions} />
         </div>
@@ -414,6 +428,30 @@ function SmallField({ label, value }) {
     <div style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: 10 }}>
       <div style={{ color: COLORS.subtext, fontSize: 11, marginBottom: 6 }}>{label}</div>
       <div style={{ color: COLORS.text, fontWeight: 700 }}>{value}</div>
+    </div>
+  )
+}
+
+function AutoRefreshToggle({ value, onChange }) {
+  return (
+    <div style={{ background: COLORS.panel, border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '10px 12px', display: 'flex', flexDirection: 'column', minWidth: 160 }}>
+      <span style={{ color: COLORS.subtext, fontSize: 11, marginBottom: 8 }}>AUTO REFRESH</span>
+      <button
+        onClick={() => onChange(!value)}
+        style={{
+          background: value ? 'rgba(74,222,128,0.16)' : 'transparent',
+          color: value ? COLORS.green : COLORS.subtext,
+          border: `1px solid ${value ? COLORS.green : COLORS.border}`,
+          borderRadius: 10,
+          padding: '8px 12px',
+          fontSize: 11,
+          fontWeight: 700,
+          cursor: 'pointer',
+          letterSpacing: 1,
+        }}
+      >
+        {value ? 'ON · 60S' : 'OFF'}
+      </button>
     </div>
   )
 }
