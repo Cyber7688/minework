@@ -79,6 +79,30 @@ function fmt(n, digits = 2) {
   return Number(n).toLocaleString(undefined, { maximumFractionDigits: digits })
 }
 
+function sortMineWallets(wallets) {
+  const hostRank = { '1387': 1, '1691': 2, 'local': 3 }
+  const roleRank = { validator: 1, miner: 2 }
+  const minerOrder = (name) => {
+    if (name === 'miner1387') return 1
+    const m1387x = /^miner1387x(\d+)$/.exec(name)
+    if (m1387x) return 100 + Number(m1387x[1])
+    const m = /^miner(\d+)$/.exec(name)
+    if (m) return 200 + Number(m[1])
+    if (name === 'miner-local-extra') return 9999
+    return 5000
+  }
+  return [...wallets].sort((a, b) => {
+    const hostDiff = (hostRank[a.host] || 99) - (hostRank[b.host] || 99)
+    if (hostDiff !== 0) return hostDiff
+    const roleDiff = (roleRank[a.role] || 99) - (roleRank[b.role] || 99)
+    if (roleDiff !== 0) return roleDiff
+    if (a.role === 'miner' && b.role === 'miner') {
+      return minerOrder(a.name) - minerOrder(b.name)
+    }
+    return a.name.localeCompare(b.name)
+  })
+}
+
 function extractSummary(profile, history, wallet, extras = {}) {
   if (wallet.role === 'predict') {
     const stats = profile?.stats || {}
@@ -139,7 +163,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState('mine')
   const [autoRefresh, setAutoRefresh] = useState(true)
 
-  const activeWallets = viewMode === 'predict' ? PREDICT_WALLETS : MINE_WALLETS
+  const activeWallets = viewMode === 'predict' ? PREDICT_WALLETS : sortMineWallets(MINE_WALLETS)
 
   const rows = useMemo(() => {
     return activeWallets.map((wallet) => {
