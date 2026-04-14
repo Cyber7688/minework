@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 const MINE_WALLETS = [
   { name: 'validator-0001', role: 'validator', host: '1387', datasets: ['validator'], address: '0x0001A97906Ac0a12E6F97eba3c3C4a44399614c4' },
+  { name: 'validator1387-extra', role: 'validator', host: '1387', datasets: ['validator'], address: '0xd6E866753363d0285c724dDd8B27C463fC53FBD4' },
   { name: 'miner1387', role: 'miner', host: '1387', datasets: ['ds_wikipedia'], address: '0x9e3278Dc6A10B54ED08296F999a9e214edf4164a' },
   { name: 'miner1387x1', role: 'miner', host: '1387', datasets: ['ds_wikipedia'], address: '0xee9Af2Cea8246D0d3e5D8f76f3191937fa24F350' },
   { name: 'miner1387x2', role: 'miner', host: '1387', datasets: ['ds_wikipedia'], address: '0x60d8Bd513FC415CaBB42c254Aa0022683A06eC5A' },
@@ -23,7 +24,9 @@ const MINE_WALLETS = [
   { name: 'miner8', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x4508cca9Db55f7a2fAe07D56e1647899C3025CEf' },
   { name: 'miner9', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x03f35db06529f78B99C1a405D3153D7Df87cb642' },
   { name: 'validator1691', role: 'validator', host: '1691', datasets: ['validator'], address: '0xC4DC724860CB900816a378F1595f31B0Ee792FA9' },
+  { name: 'validator1691-extra', role: 'validator', host: '1691', datasets: ['validator'], address: '0x02Dc2EC171544bBaD23FFA9BB2303C62C1Cc43F0' },
   { name: 'validator-local', role: 'validator', host: 'local', datasets: ['validator'], address: '0xa3800759B8b461126Dc56394D82B0807F8129e51' },
+  { name: 'validator-local-extra', role: 'validator', host: 'local', datasets: ['validator'], address: '0x8ccA86778f42bd58af709435786FDE8Fe28808CC' },
   { name: 'miner10', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xcb7efeB724a980E6c4493bD1b0A527E407560461' },
   { name: 'miner18', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x15B83bfcF12433E83864DcEee59BA3fA34cAe562' },
   { name: 'miner19', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xd47cAaa3bB76099a630b360f5233b13F9B1aeEf9' },
