@@ -205,8 +205,7 @@ export default function Home() {
 
   async function loadAll() {
     setLoading(true)
-    const next = {}
-    for (const wallet of activeWallets) {
+    const entries = await Promise.all(activeWallets.map(async (wallet) => {
       try {
         const endpoint = wallet.role === 'predict' ? 'predict-profile' : 'mine-profile'
         const res = await fetch(`/api/${endpoint}?address=${wallet.address}`)
@@ -217,22 +216,23 @@ export default function Home() {
           equity: json.equity || null,
           epoch: json.epoch || null,
         }
-        next[wallet.address] = {
+        return [wallet.address, {
           wallet,
           profile,
           history,
           summary: extractSummary(profile, history, wallet, extras),
-        }
+        }]
       } catch (e) {
-        next[wallet.address] = {
+        return [wallet.address, {
           wallet,
           profile: null,
           history: [],
           summary: null,
           error: String(e),
-        }
+        }]
       }
-    }
+    }))
+    const next = Object.fromEntries(entries)
     setProfiles(next)
     setLastUpdated(new Date())
     setLoading(false)
