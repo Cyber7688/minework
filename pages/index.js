@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react'
 
 const MINE_WALLETS = [
   { name: 'validator-0001', role: 'validator', host: '1387', datasets: ['validator'], address: '0x0001A97906Ac0a12E6F97eba3c3C4a44399614c4' },
-  { name: 'miner1387', role: 'miner', host: '1387', datasets: ['ds_arxiv'], address: '0x9e3278Dc6A10B54ED08296F999a9e214edf4164a' },
+  { name: 'miner1387', role: 'miner', host: '1387', datasets: ['ds_wikipedia'], address: '0x9e3278Dc6A10B54ED08296F999a9e214edf4164a' },
   { name: 'miner1', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x1410e83a725DE68494AC6f4c4F8c91a0c821Af1d' },
   { name: 'miner2', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x4C363FC335eAf5c5D4330Ec5b493ECCB5162193A' },
   { name: 'miner3', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x83c9fc9F42F33437721d7d7baA63FD3127aB7E73' },
   { name: 'miner4', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x5940DE4e11B44d24a15bB745Fca823Ae61df3F96' },
-  { name: 'miner5', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x2f5Da0c177C7BBF56977A944c9Db93e504ba1BD8' },
-  { name: 'miner6', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x1ca521653a57854BB547E4e63119aC97a0284BEF' },
-  { name: 'miner7', role: 'miner', host: '1691', datasets: ['ds_arxiv'], address: '0x5451Cc662D5D2aC93694ba49811Bc58121A8784a' },
+  { name: 'miner5', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x2f5Da0c177C7BBF56977A944c9Db93e504ba1BD8' },
+  { name: 'miner6', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x1ca521653a57854BB547E4e63119aC97a0284BEF' },
+  { name: 'miner7', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x5451Cc662D5D2aC93694ba49811Bc58121A8784a' },
   { name: 'miner8', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x4508cca9Db55f7a2fAe07D56e1647899C3025CEf' },
   { name: 'miner9', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x03f35db06529f78B99C1a405D3153D7Df87cb642' },
   { name: 'validator1691', role: 'validator', host: '1691', datasets: ['validator'], address: '0xC4DC724860CB900816a378F1595f31B0Ee792FA9' },
