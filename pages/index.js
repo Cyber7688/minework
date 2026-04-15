@@ -59,6 +59,7 @@ const PREDICT_WALLETS = [
   { name: 'predict8', role: 'predict', host: '1691', datasets: ['persona: chartist'], address: '0x5107100D36E54dD28BEbB732621d8521A2A16181' },
   { name: 'predict9', role: 'predict', host: '1691', datasets: ['persona: macro'], address: '0xee9A8E4D5B3D2773964290F618119F29B92Adc9d' },
   { name: 'predict10', role: 'predict', host: '1691', datasets: ['persona: sentiment'], address: '0x73E29f56Bd9ecD82c2A70DF90E109e5B44B44441' },
+  { name: 'predict-main', role: 'predict', host: '69.157.137.231', datasets: ['persona: conservative', 'migrated: vps-new'], address: '0x605E8042b009Fbc54424A3d957948ba155a285d9' },
 ]
 
 const COLORS = {
