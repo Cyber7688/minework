@@ -386,10 +386,10 @@ export default function Home() {
   const [autoRefresh, setAutoRefresh] = useState(true)
 
   const activeWallets = useMemo(() => {
-    if (viewMode === 'predict') return PREDICT_WALLETS
+    if (viewMode === 'predict') return PREDICT_WALLETS.filter((wallet) => wallet.host !== 'VAST')
     if (viewMode === 'vast-predict') return PREDICT_WALLETS.filter((wallet) => wallet.host === 'VAST')
     if (viewMode === 'vast-mine') return sortMineWallets(MINE_WALLETS.filter((wallet) => wallet.host === 'VAST'))
-    return sortMineWallets(MINE_WALLETS)
+    return sortMineWallets(MINE_WALLETS.filter((wallet) => wallet.host !== 'VAST'))
   }, [viewMode])
 
   const rows = useMemo(() => {
