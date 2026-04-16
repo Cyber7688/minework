@@ -385,7 +385,12 @@ export default function Home() {
   const [viewMode, setViewMode] = useState('mine')
   const [autoRefresh, setAutoRefresh] = useState(true)
 
-  const activeWallets = viewMode === 'predict' ? PREDICT_WALLETS : sortMineWallets(MINE_WALLETS)
+  const activeWallets = useMemo(() => {
+    if (viewMode === 'predict') return PREDICT_WALLETS
+    if (viewMode === 'vast-predict') return PREDICT_WALLETS.filter((wallet) => wallet.host === 'VAST')
+    if (viewMode === 'vast-mine') return sortMineWallets(MINE_WALLETS.filter((wallet) => wallet.host === 'VAST'))
+    return sortMineWallets(MINE_WALLETS)
+  }, [viewMode])
 
   const rows = useMemo(() => {
     return activeWallets.map((wallet) => {
@@ -504,15 +509,19 @@ export default function Home() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 26 }}>
           <div>
             <div style={{ color: COLORS.green, fontSize: 13, letterSpacing: 3, marginBottom: 10, textTransform: 'uppercase' }}>
-              &gt;_ {viewMode === 'predict' ? 'predict worknet' : 'minework'} // cyber ops console
+              &gt;_ {viewMode === 'predict' ? 'predict worknet' : viewMode === 'vast-predict' ? 'vast predict worknet' : viewMode === 'vast-mine' ? 'vast minework' : 'minework'} // cyber ops console
             </div>
             <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>
-              {viewMode === 'predict' ? 'Predict Fleet Dashboard' : 'Fleet Monitoring Dashboard'}
+              {viewMode === 'predict' ? 'Predict Fleet Dashboard' : viewMode === 'vast-predict' ? 'VAST Predict Fleet Dashboard' : viewMode === 'vast-mine' ? 'VAST Mine Fleet Dashboard' : 'Fleet Monitoring Dashboard'}
             </h1>
             <p style={{ color: COLORS.subtext, marginTop: 12, marginBottom: 0, maxWidth: 860, lineHeight: 1.6 }}>
               {viewMode === 'predict'
                 ? 'Separate view for Predict wallets with persona labels, wallet visibility, and quick ops refresh.'
-                : 'Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.'}
+                : viewMode === 'vast-predict'
+                  ? 'Isolated VAST predict fleet view for bot001-bot100 without legacy wallet noise.'
+                  : viewMode === 'vast-mine'
+                    ? 'Isolated VAST mine fleet view for vastminer1-vastminer100.'
+                    : 'Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.'}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -708,6 +717,8 @@ function ViewToggle({ value, onChange }) {
   const options = [
     { value: 'mine', label: 'MINE' },
     { value: 'predict', label: 'PREDICT' },
+    { value: 'vast-mine', label: 'VAST MINER' },
+    { value: 'vast-predict', label: 'VAST PREDICT' },
   ]
 
   return (
