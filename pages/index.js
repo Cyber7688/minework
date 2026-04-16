@@ -201,17 +201,16 @@ function extractSummary(profile, history, wallet, extras = {}) {
     : (minerSummary?.total_rewards ?? history.reduce((sum, item) => sum + (Number(item.reward_amount) || 0), 0))
   const qualifiedEpochs = history.filter((x) => x.qualified).length
 
-  const validatorTaskCount = Number(currentEpochValidator.eval_count ?? validatorSummary.total_evals ?? 0)
+  const validatorEpochTasks = Number(currentEpochValidator.eval_count ?? 0)
   const validatorLifetimeEvals = Number(validatorSummary.total_evals ?? 0)
-  const minerTaskCount = Number(currentEpochMiner.task_count ?? minerSummary.total_tasks ?? 0)
+  const minerEpochTasks = Number(currentEpochMiner.task_count ?? 0)
   const minerLifetimeTasks = Number(minerSummary.total_tasks ?? 0)
 
   return {
     online: wallet.role === 'validator' ? Boolean(validator.online) : Boolean(miner.online),
     credit: wallet.role === 'validator' ? (validator.credit ?? 0) : (miner.credit ?? 0),
-    taskCount: wallet.role === 'validator'
-      ? Math.max(validatorTaskCount, validatorLifetimeEvals)
-      : Math.max(minerTaskCount, minerLifetimeTasks),
+    taskCount: wallet.role === 'validator' ? validatorEpochTasks : minerEpochTasks,
+    lifetimeTaskCount: wallet.role === 'validator' ? validatorLifetimeEvals : minerLifetimeTasks,
     avgScore: wallet.role === 'validator'
       ? Number(currentEpochValidator.accuracy ?? validatorSummary.avg_accuracy ?? 0)
       : Number(currentEpochMiner.avg_score ?? minerSummary.avg_score ?? 0),
@@ -386,7 +385,7 @@ export default function Home() {
         <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
           <MetricCard label="RUNNING" value={fmt(totals.running, 0)} color={COLORS.green} />
           <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.yellow} />
-          <MetricCard label={viewMode === 'predict' ? 'SUBMISSIONS' : 'TASKS'} value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
+          <MetricCard label={viewMode === 'predict' ? 'SUBMISSIONS' : 'EPOCH TASKS'} value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
           <MetricCard label={viewMode === 'predict' ? 'CORRECT' : 'QUALIFIED'} value={fmt(totals.qualifiedEpochs, 0)} color={COLORS.purple} />
           <MetricCard label={viewMode === 'predict' ? 'EST. REWARD' : 'REWARDS'} value={fmt(totals.rewards)} color={COLORS.green} />
           <MetricCard label={viewMode === 'predict' ? 'ACCURACY' : 'AVG SCORE'} value={fmt(totals.avgScore)} color={COLORS.cyan} />
@@ -418,7 +417,7 @@ export default function Home() {
               <tr style={{ background: COLORS.panelStrong }}>
                 {(viewMode === 'predict'
                   ? ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'PERSONA', 'BALANCE', 'SUBMITS', 'ACCURACY', 'EST. REWARD']
-                  : ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'DATASETS', 'CREDIT', 'TASKS', 'AVG SCORE', 'TOTAL REWARDS']
+                  : ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'DATASETS', 'CREDIT', 'EPOCH TASKS', 'LIFETIME TASKS', 'AVG SCORE', 'TOTAL REWARDS']
                 ).map((h) => (
                   <th key={h} style={{ padding: '14px 12px', textAlign: 'left', fontSize: 12, color: COLORS.subtext, letterSpacing: 1.2, borderBottom: `1px solid ${COLORS.border}` }}>{h}</th>
                 ))}
@@ -442,6 +441,7 @@ export default function Home() {
                     <td style={{ padding: 12, color: COLORS.subtext, fontSize: 12 }}>{wallet.datasets.join(', ')}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.credit) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.taskCount, 0) : '-'}</td>
+                    <td style={{ padding: 12 }}>{summary ? fmt(summary.lifetimeTaskCount, 0) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.avgScore) : '-'}</td>
                     <td style={{ padding: 12, color: COLORS.green }}>{summary ? fmt(summary.totalRewards) : '-'}</td>
                   </tr>
@@ -471,7 +471,8 @@ export default function Home() {
                 <div style={{ color: COLORS.subtext, fontSize: 12, marginBottom: 12 }}>Datasets: {wallet.datasets.join(', ')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 10, fontSize: 13 }}>
                   <SmallField label="Credit" value={summary ? fmt(summary.credit) : '-'} />
-                  <SmallField label="Tasks" value={summary ? fmt(summary.taskCount, 0) : '-'} />
+                  <SmallField label="Epoch Tasks" value={summary ? fmt(summary.taskCount, 0) : '-'} />
+                  <SmallField label="Lifetime Tasks" value={summary ? fmt(summary.lifetimeTaskCount, 0) : '-'} />
                   <SmallField label="Avg Score" value={summary ? fmt(summary.avgScore) : '-'} />
                   <SmallField label="Qualified" value={summary ? fmt(summary.qualifiedEpochs, 0) : '-'} />
                   <SmallField label="Rewards" value={summary ? fmt(summary.totalRewards) : '-'} />
