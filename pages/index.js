@@ -201,11 +201,20 @@ function extractSummary(profile, history, wallet, extras = {}) {
     : (minerSummary?.total_rewards ?? history.reduce((sum, item) => sum + (Number(item.reward_amount) || 0), 0))
   const qualifiedEpochs = history.filter((x) => x.qualified).length
 
+  const validatorTaskCount = Number(currentEpochValidator.eval_count ?? validatorSummary.total_evals ?? 0)
+  const validatorLifetimeEvals = Number(validatorSummary.total_evals ?? 0)
+  const minerTaskCount = Number(currentEpochMiner.task_count ?? minerSummary.total_tasks ?? 0)
+  const minerLifetimeTasks = Number(minerSummary.total_tasks ?? 0)
+
   return {
     online: wallet.role === 'validator' ? Boolean(validator.online) : Boolean(miner.online),
     credit: wallet.role === 'validator' ? (validator.credit ?? 0) : (miner.credit ?? 0),
-    taskCount: wallet.role === 'validator' ? (currentEpochValidator.eval_count ?? 0) : (currentEpochMiner.task_count ?? 0),
-    avgScore: wallet.role === 'validator' ? (currentEpochValidator.accuracy ?? 0) : (currentEpochMiner.avg_score ?? 0),
+    taskCount: wallet.role === 'validator'
+      ? Math.max(validatorTaskCount, validatorLifetimeEvals)
+      : Math.max(minerTaskCount, minerLifetimeTasks),
+    avgScore: wallet.role === 'validator'
+      ? Number(currentEpochValidator.accuracy ?? validatorSummary.avg_accuracy ?? 0)
+      : Number(currentEpochMiner.avg_score ?? minerSummary.avg_score ?? 0),
     totalRewards,
     qualifiedEpochs,
   }
