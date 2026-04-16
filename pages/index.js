@@ -27,6 +27,16 @@ const MINE_WALLETS = [
   { name: 'validator1691-extra', role: 'validator', host: '1691', datasets: ['validator'], address: '0x02Dc2EC171544bBaD23FFA9BB2303C62C1Cc43F0' },
   { name: 'validator-local', role: 'validator', host: 'local', datasets: ['validator'], address: '0xa3800759B8b461126Dc56394D82B0807F8129e51' },
   { name: 'validator-local-extra', role: 'validator', host: 'local', datasets: ['validator'], address: '0x8ccA86778f42bd58af709435786FDE8Fe28808CC' },
+  { name: 'validator34351-01', role: 'validator', host: '34351', datasets: ['validator'], address: '0xb13CBDd7064a78b46C9B2A115EA4060Cd45389E3' },
+  { name: 'validator34351-02', role: 'validator', host: '34351', datasets: ['validator'], address: '0x54d20E365113846Fa4d7767d5F16411CD47ed8ED' },
+  { name: 'validator34351-03', role: 'validator', host: '34351', datasets: ['validator'], address: '0xeE8ae0b6B173F96591a92Ae185Af8efe7Bbf7a97' },
+  { name: 'validator34351-04', role: 'validator', host: '34351', datasets: ['validator'], address: '0x6FC6f6b15fe7559FDB15b48c7CBBcAAC46022db3' },
+  { name: 'validator34351-05', role: 'validator', host: '34351', datasets: ['validator'], address: '0x64c2403C04a0847c40ed348A7387298059fD8B9a' },
+  { name: 'validator34351-06', role: 'validator', host: '34351', datasets: ['validator'], address: '0xa5abE9A032950D11c9857080Fc1578B185358a66' },
+  { name: 'validator34351-07', role: 'validator', host: '34351', datasets: ['validator'], address: '0x2bB6EB606bb1622bF37f1f3b3Eb0023CaC57634E' },
+  { name: 'validator34351-08', role: 'validator', host: '34351', datasets: ['validator'], address: '0x4ceD91532a52f53e9c1572C07603E50a3594e2D2' },
+  { name: 'validator34351-09', role: 'validator', host: '34351', datasets: ['validator'], address: '0xC742285062d6ac57e0Ec593e786D03c77FB0f157' },
+  { name: 'validator34351-10', role: 'validator', host: '34351', datasets: ['validator'], address: '0x7906270Fe4cc1E1016141E9773C036e88E81d793' },
   { name: 'miner10', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xcb7efeB724a980E6c4493bD1b0A527E407560461' },
   { name: 'miner18', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0x15B83bfcF12433E83864DcEee59BA3fA34cAe562' },
   { name: 'miner19', role: 'miner', host: '1691', datasets: ['ds_wikipedia'], address: '0xd47cAaa3bB76099a630b360f5233b13F9B1aeEf9' },
@@ -134,7 +144,7 @@ function fmt(n, digits = 2) {
 }
 
 function sortMineWallets(wallets) {
-  const hostRank = { '1387': 1, '1691': 2, 'local': 3 }
+  const hostRank = { '1387': 1, '1691': 2, '34351': 3, 'local': 4 }
   const roleRank = { validator: 1, miner: 2 }
   const minerOrder = (name) => {
     if (name === 'miner1387') return 1
