@@ -356,6 +356,10 @@ function extractSummary(profile, history, wallet, extras = {}) {
   const minerEpochTasks = Number(currentEpochMiner.task_count ?? 0)
   const minerLifetimeTasks = Number(minerSummary.total_tasks ?? 0)
 
+  const accuracy = wallet.role === 'validator'
+    ? Number(currentEpochValidator.accuracy ?? validatorSummary.avg_accuracy ?? 0)
+    : Number(currentEpochMiner.accuracy ?? minerSummary.accuracy ?? currentEpochMiner.avg_score ?? minerSummary.avg_score ?? 0)
+
   return {
     online: wallet.role === 'validator' ? Boolean(validator.online) : Boolean(miner.online),
     credit: wallet.role === 'validator' ? (validator.credit ?? 0) : (miner.credit ?? 0),
@@ -364,6 +368,7 @@ function extractSummary(profile, history, wallet, extras = {}) {
     avgScore: wallet.role === 'validator'
       ? Number(currentEpochValidator.accuracy ?? validatorSummary.avg_accuracy ?? 0)
       : Number(currentEpochMiner.avg_score ?? minerSummary.avg_score ?? 0),
+    accuracy,
     totalRewards,
     qualifiedEpochs,
   }
@@ -576,7 +581,7 @@ export default function Home() {
               <tr style={{ background: COLORS.panelStrong }}>
                 {(viewMode === 'predict'
                   ? ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'PERSONA', 'BALANCE', 'SUBMITS', 'ACCURACY', 'EST. REWARD']
-                  : ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'DATASETS', 'CREDIT', 'EPOCH TASKS', 'LIFETIME TASKS', 'AVG SCORE', 'TOTAL REWARDS']
+                  : ['NAME', 'ROLE', 'HOST', 'WALLET', 'STATUS', 'DATASETS', 'CREDIT', 'EPOCH TASKS', 'LIFETIME TASKS', 'AVG SCORE', 'ACCURACY', 'TOTAL REWARDS']
                 ).map((h) => (
                   <th key={h} style={{ padding: '14px 12px', textAlign: 'left', fontSize: 12, color: COLORS.subtext, letterSpacing: 1.2, borderBottom: `1px solid ${COLORS.border}` }}>{h}</th>
                 ))}
@@ -602,6 +607,7 @@ export default function Home() {
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.taskCount, 0) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.lifetimeTaskCount, 0) : '-'}</td>
                     <td style={{ padding: 12 }}>{summary ? fmt(summary.avgScore) : '-'}</td>
+                    <td style={{ padding: 12 }}>{summary ? fmt(summary.accuracy) : '-'}</td>
                     <td style={{ padding: 12, color: COLORS.green }}>{summary ? fmt(summary.totalRewards) : '-'}</td>
                   </tr>
                 )
@@ -633,6 +639,7 @@ export default function Home() {
                   <SmallField label="Epoch Tasks" value={summary ? fmt(summary.taskCount, 0) : '-'} />
                   <SmallField label="Lifetime Tasks" value={summary ? fmt(summary.lifetimeTaskCount, 0) : '-'} />
                   <SmallField label="Avg Score" value={summary ? fmt(summary.avgScore) : '-'} />
+                  <SmallField label="Accuracy" value={summary ? fmt(summary.accuracy) : '-'} />
                   <SmallField label="Qualified" value={summary ? fmt(summary.qualifiedEpochs, 0) : '-'} />
                   <SmallField label="Rewards" value={summary ? fmt(summary.totalRewards) : '-'} />
                 </div>
