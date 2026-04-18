@@ -158,6 +158,110 @@ const MINE_WALLETS = [
 { name: 'vastminer100', role: 'miner', host: 'VAST', datasets: ['ds_wikipedia'], address: '0xc0535BdD9B291135f8cAD9560f08B74D34DF6fAD' },
 ]
 
+const TESTER_WALLETS = [
+{ name: 'wallet001', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xFF6480866a2ef159A22de824CfDc275EA78c04fC' },
+{ name: 'wallet002', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xb458e4D64f7C7aF4dBa21292707f543B2bBd3186' },
+{ name: 'wallet003', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x129ABC7D6078FC7195D3dbF6c2e975De7b988E10' },
+{ name: 'wallet004', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x6402AbC6c10AB0D086c120fAB946e21B30c24A30' },
+{ name: 'wallet005', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x99c7F03760FF0B0fC7B23EaEda7b5869A580f541' },
+{ name: 'wallet006', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x10c6A3ea301bfA8A3BAcF9d33068d28058E465f6' },
+{ name: 'wallet007', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x5d4264174B71a560Dd59E8e7647cd7Dab54986ec' },
+{ name: 'wallet008', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x1790d3eB0042132DBE378C4E97d6e80eD80AAFba' },
+{ name: 'wallet009', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x01B143dbA98d733786A6c7fF34eE0E5017C490A2' },
+{ name: 'wallet010', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x759Bb5A2F3969D558C03675D2d2Ba8F5C68A2Ab1' },
+{ name: 'wallet011', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x2122A25AA60719E54FBB52E321bB70ff34B5db31' },
+{ name: 'wallet012', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x43A6Df813879987a9E91951f574113c90cdA328f' },
+{ name: 'wallet013', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x38e1886b414f5207fECFA361F014F2acEC9823FB' },
+{ name: 'wallet014', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x5692cE80b00579FD583D35C9f0d16A298eFd2350' },
+{ name: 'wallet015', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x191Ae0051d2a321642E205A18406A3DEc4b43099' },
+{ name: 'wallet016', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x0E435B07016cA1632458Ba20F185Ea649004567c' },
+{ name: 'wallet017', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xFeE84538660c2B615238db16d89646633C391725' },
+{ name: 'wallet018', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xF419C25dEA9676DCe87Ce6Dd0Bc94b4772589733' },
+{ name: 'wallet019', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xfAa955bE7fC331a0D29225809ACCb987880577Fe' },
+{ name: 'wallet020', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x0Cdc97Dba25690df365d3d674C8f8f846f0894b6' },
+{ name: 'wallet021', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x5A78e91a411dbe354aF28c2AAFEf3e0B4C87Fa9c' },
+{ name: 'wallet022', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xe6A8C69E7aDcAF4AD4C54Bb6cEBC5876cF7Ef89e' },
+{ name: 'wallet023', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xDa26D06147c99c505f8524c3040ca08F594EA6EC' },
+{ name: 'wallet024', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xf23D171047ED7Af803ed7DEc8af851CCa92dbBB9' },
+{ name: 'wallet025', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xd7B71AdCb3b713c35b11c1522aE7B57E5e5373FF' },
+{ name: 'wallet026', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xf8D9cf4b7c31b01d6C380c8bdf3419E220d8d711' },
+{ name: 'wallet027', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xf10964ea4D5eB85b2a698D5c9AfBdd82e877C916' },
+{ name: 'wallet028', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xE47D7d7Df1cDD79C8A29fd29a9fB681aBa6307AF' },
+{ name: 'wallet029', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x25b626113b277b45726cF473FDb92217FD59E8b6' },
+{ name: 'wallet030', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xAF7262003bf3eCbe1796B12487a87CDEb908F7B9' },
+{ name: 'wallet031', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x42775f90B7A724a2B9948218A72A4e3e2E6BDBd0' },
+{ name: 'wallet032', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xC90998347dc40FfedE31623601B116ccf831Aee0' },
+{ name: 'wallet033', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x76dCF659d1B3f727E6dD2a13A4432916e9156d4F' },
+{ name: 'wallet034', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xc58981C726341F6541ccecdF282e8c78738d8001' },
+{ name: 'wallet035', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xeaf33059ABafdA81e6761283e0D617367b2C800a' },
+{ name: 'wallet036', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xCEDCb9C666Fb275b51C59B7685189d4eDAC8f469' },
+{ name: 'wallet037', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xc879498b4a788CCF338A40e0DdE058C381543456' },
+{ name: 'wallet038', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x31EF2a91179A72b1Dfa0c2911F9f39a087C25772' },
+{ name: 'wallet039', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x0f5Eb3C2F35c96BF9543813C48a7a7e750d1865A' },
+{ name: 'wallet040', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x3aA53219e818e44a67FEfDDEDD443a5d560c4024' },
+{ name: 'wallet041', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x1F1E10C19f7213bb1A804d091D83e552A2695261' },
+{ name: 'wallet042', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x11531F8200093fa4De3CF9De45327BB998566d98' },
+{ name: 'wallet043', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x9F6d10988DECB3e2D84C809812F0e0Ade19fc27f' },
+{ name: 'wallet044', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x3D0B882c345e56C0941b33ee0C9cccddFF8132AE' },
+{ name: 'wallet045', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xe8d4Ec9202861121476f2B1f97B83216682D22de' },
+{ name: 'wallet046', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x58a0f41f8879Dc07439217Efc6388CC2dCEEd8D5' },
+{ name: 'wallet047', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x2C55C4BC8B3eF173649d0a033dE9c41F3BAcefC6' },
+{ name: 'wallet048', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x9AD46b57a5028d420EE34D93d49c225391f06338' },
+{ name: 'wallet049', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xf015F41B7B9562834E56a37D8E699D8b3d4377d0' },
+{ name: 'wallet050', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x95F92C1C955648473A4a6517dc300F789f2c4eC3' },
+{ name: 'wallet051', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x315C6aB2786cC13BA48008112Bb71f181A4C0707' },
+{ name: 'wallet052', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xDD54ea7425E3a36025463B949Dc2FbAaD94AfDd1' },
+{ name: 'wallet053', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xb28E426C9671D52DA14641E17bC24d32be6184Ca' },
+{ name: 'wallet054', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x466251b04F51C12c258A20E9E5b5B4c2174372D8' },
+{ name: 'wallet055', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x56b4f6cbC87906b5b7b3252F7351c7287828A979' },
+{ name: 'wallet056', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xDa1dA78C26742Fe7b521979c3102DFbE0c361860' },
+{ name: 'wallet057', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x5bc8e9552b3E5D55c61F026dDC9D9e89F41C67E1' },
+{ name: 'wallet058', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xeE97990f5B18bA1D013Fa6D3497f6F5612eF40f8' },
+{ name: 'wallet059', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x15cbb72e5B15E9331759E52066cc4ABad84DD203' },
+{ name: 'wallet060', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xb73a6D3fE228b9dE2aD90af8C8a7E5D2900b7BF5' },
+{ name: 'wallet061', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x1Ff4c03E56AB5397A0E70dc030E34b8Caac75b42' },
+{ name: 'wallet062', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xbd3576E4e809137370D7b41A8a6B01F2474354C7' },
+{ name: 'wallet063', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x2CDf85f507b273E4e07a665a2E9a737ecffa8591' },
+{ name: 'wallet064', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x7297590d1064227B763C0f2AB13e152660a8D3fC' },
+{ name: 'wallet065', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xCAB40391f283E0D977cc0BEeE42C209ac4f85c4F' },
+{ name: 'wallet066', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xAd36A449a94c477c3C128871C1be84F880bD69E9' },
+{ name: 'wallet067', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x8Ef6526C0F12aE3FbFa90262D26290FEf30a35DA' },
+{ name: 'wallet068', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x7746B190c6420eFC678fdfbADfE8d9c84c7B754B' },
+{ name: 'wallet069', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xec1b1D7041C7E86DA6231cc4BDf7B8aD5F49cD37' },
+{ name: 'wallet070', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x526d278d63FDBAdD590dA135f050D7eB6eD8e250' },
+{ name: 'wallet071', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xdc5ccEf7d8354307B044970c2bbB62F517541E5B' },
+{ name: 'wallet072', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x94F8Da7C433D733b6cC9Ac9e496383b7b1e2e91b' },
+{ name: 'wallet073', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xFa3772A8A772711392F3E6acd140A6fd06819Fc8' },
+{ name: 'wallet074', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x7b39916B691DA2B04536bA7d6Af6369585a0C648' },
+{ name: 'wallet075', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xe194dDCe1Bdf1b1bb2cE841dd9Efd2Dc07223a26' },
+{ name: 'wallet076', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xc710E842b38Ce087483ecFF616793a15Ee9E78cB' },
+{ name: 'wallet077', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x97fcAdbF325d1A360968f2F2F819C12304D92E15' },
+{ name: 'wallet078', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xD705Cf8Edd7Ef5Bc7624F490E1D04A41Df8A5683' },
+{ name: 'wallet079', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x692569eEA91B5e35f6aA02c95400C5e621ac9489' },
+{ name: 'wallet080', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x868E7Db5325CaacEF72239e27Ec584532b5047A6' },
+{ name: 'wallet081', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x9d0De70B9d8916b5F6917E6e24a144931757f042' },
+{ name: 'wallet082', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xf1A464437A9E7598D9415F414A89196a7355FF0e' },
+{ name: 'wallet083', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x4B85D2b3408B6fc3c5de8F1402731b631f54aCdD' },
+{ name: 'wallet084', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x025f963B952e952271F77fac0a226c2B7E835ffd' },
+{ name: 'wallet085', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xa991944A6Ca7825e6C3f29F36Ed1e6F348965e00' },
+{ name: 'wallet086', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x54a2cF883ff5450357d936482c84490C335EBe24' },
+{ name: 'wallet087', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x5F8BbF6339D9cc8A4b9759BA2ABb008cB7F0E739' },
+{ name: 'wallet088', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xc7F9FcB089E131eed2dA6A0aF0cb965C3eD1373f' },
+{ name: 'wallet089', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xdfe8179E860D61A32319a0DCEf4057B7D3912778' },
+{ name: 'wallet090', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xe4D91b4673658489B344911C3418Fb594ED5C631' },
+{ name: 'wallet091', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x6d7D7A7Ca1D13D0a42cb292208218487A58389d6' },
+{ name: 'wallet092', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x17fcc4C74c0Fb2B600458d91Cba51584CaeFDb46' },
+{ name: 'wallet093', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xa01E5BEe5FD290136B887Fc219a857B5394dFCaA' },
+{ name: 'wallet094', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xcc6C0Ed9e54ba9628c0a5A0959f47D7f7e40E8e4' },
+{ name: 'wallet095', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x2B8E05768C53c0e16dDADF774C465A67AdB7fDf2' },
+{ name: 'wallet096', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x97469Fe9ff5DCa302959A07caEf8c30A3f2d1e63' },
+{ name: 'wallet097', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x1871ff642631a8973c5A2209b0503596B4746275' },
+{ name: 'wallet098', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x9e43B80b0ae2a7Fde1FCC4905a95017b23fbeB3D' },
+{ name: 'wallet099', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0xB2A681F6CD6e43140B3e78ce4B8c15697c4A86F8' },
+{ name: 'wallet100', role: 'miner', host: 'TESTER', datasets: ['ds_wikipedia'], address: '0x8898c1414aCDD141405Bd031E2379f0394f7d5E7' }
+]
+
+
 const PREDICT_WALLETS = [
 { name: 'predict1', role: 'predict', host: '1691', datasets: ['persona: chartist'], address: '0x8d3EB4AC0c33d03de6d4342d158f9Aaa75ed1D73' },
 { name: 'predict2', role: 'predict', host: '1691', datasets: ['persona: macro'], address: '0x301926AAeC232EBeb6d2919E1A87E0f9351f082E' },
@@ -394,6 +498,7 @@ export default function Home() {
     if (viewMode === 'predict') return PREDICT_WALLETS.filter((wallet) => wallet.host !== 'VAST')
     if (viewMode === 'vast-predict') return PREDICT_WALLETS.filter((wallet) => wallet.host === 'VAST')
     if (viewMode === 'vast-mine') return sortMineWallets(MINE_WALLETS.filter((wallet) => wallet.host === 'VAST'))
+    if (viewMode === 'tester') return sortMineWallets(TESTER_WALLETS)
     return sortMineWallets(MINE_WALLETS.filter((wallet) => wallet.host !== 'VAST'))
   }, [viewMode])
 
@@ -514,10 +619,10 @@ export default function Home() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 26 }}>
           <div>
             <div style={{ color: COLORS.green, fontSize: 13, letterSpacing: 3, marginBottom: 10, textTransform: 'uppercase' }}>
-              &gt;_ {viewMode === 'predict' ? 'predict worknet' : viewMode === 'vast-predict' ? 'vast predict worknet' : viewMode === 'vast-mine' ? 'vast minework' : 'minework'} // cyber ops console
+              &gt;_ {viewMode === 'predict' ? 'predict worknet' : viewMode === 'vast-predict' ? 'vast predict worknet' : viewMode === 'vast-mine' ? 'vast minework' : viewMode === 'tester' ? 'tester minework' : 'minework'} // cyber ops console
             </div>
             <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>
-              {viewMode === 'predict' ? 'Predict Fleet Dashboard' : viewMode === 'vast-predict' ? 'VAST Predict Fleet Dashboard' : viewMode === 'vast-mine' ? 'VAST Mine Fleet Dashboard' : 'Fleet Monitoring Dashboard'}
+              {viewMode === 'predict' ? 'Predict Fleet Dashboard' : viewMode === 'vast-predict' ? 'VAST Predict Fleet Dashboard' : viewMode === 'vast-mine' ? 'VAST Mine Fleet Dashboard' : viewMode === 'tester' ? 'Tester Mine Fleet Dashboard' : 'Fleet Monitoring Dashboard'}
             </h1>
             <p style={{ color: COLORS.subtext, marginTop: 12, marginBottom: 0, maxWidth: 860, lineHeight: 1.6 }}>
               {viewMode === 'predict'
@@ -526,7 +631,9 @@ export default function Home() {
                   ? 'Isolated VAST predict fleet view for bot001-bot100 without legacy wallet noise.'
                   : viewMode === 'vast-mine'
                     ? 'Isolated VAST mine fleet view for vastminer1-vastminer100.'
-                    : 'Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.'}
+                    : viewMode === 'tester'
+                      ? 'Dedicated tester tab for the new 100 mine workers (wallet001-wallet100).'
+                      : 'Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.'}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -726,6 +833,7 @@ function ViewToggle({ value, onChange }) {
     { value: 'predict', label: 'PREDICT' },
     { value: 'vast-mine', label: 'VAST MINER' },
     { value: 'vast-predict', label: 'VAST PREDICT' },
+    { value: 'tester', label: 'TESTER' },
   ]
 
   return (
