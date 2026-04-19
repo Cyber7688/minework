@@ -1,10 +1,20 @@
+const DEFAULT_MINER_ADDRESS = '0x95F92C1C955648473A4a6517dc300F789f2c4eC3'
+
 const DEFAULT_ENDPOINTS = [
   { key: 'site_home', label: 'minework.net /', url: 'https://minework.net' },
-  { key: 'site_miner_profile', label: 'minework.net /api/miners/:sample', url: 'https://minework.net/api/miners/0x95F92C1C955648473A4a6517dc300F789f2c4eC3' },
+  { key: 'site_miner_profile', label: 'minework.net /api/miners/:wallet', url: `https://minework.net/api/miners/${DEFAULT_MINER_ADDRESS}` },
   { key: 'api_health', label: 'api.minework.net /health', url: 'https://api.minework.net/health' },
   { key: 'api_datasets', label: 'api.minework.net /api/core/v1/datasets', url: 'https://api.minework.net/api/core/v1/datasets' },
   { key: 'api_mining_health', label: 'api.minework.net /api/mining/v1/health', url: 'https://api.minework.net/api/mining/v1/health' },
 ]
+
+function buildEndpoints(minerAddress = DEFAULT_MINER_ADDRESS) {
+  return DEFAULT_ENDPOINTS.map((endpoint) =>
+    endpoint.key === 'site_miner_profile'
+      ? { ...endpoint, url: `https://minework.net/api/miners/${minerAddress}` }
+      : endpoint
+  )
+}
 
 async function checkOne(endpoint) {
   const startedAt = Date.now()
@@ -41,6 +51,10 @@ async function checkOne(endpoint) {
 export default async function handler(req, res) {
   try {
     const keysRaw = req.query.keys
+    const minerAddressRaw = String(req.query.minerAddress || DEFAULT_MINER_ADDRESS).trim()
+    const minerAddress = /^0x[a-fA-F0-9]{40}$/.test(minerAddressRaw) ? minerAddressRaw : DEFAULT_MINER_ADDRESS
+    const allEndpoints = buildEndpoints(minerAddress)
+
     const keys = Array.isArray(keysRaw)
       ? keysRaw.flatMap((x) => String(x).split(','))
       : keysRaw
@@ -48,8 +62,8 @@ export default async function handler(req, res) {
         : []
     const wanted = new Set(keys.map((x) => x.trim()).filter(Boolean))
     const endpoints = wanted.size
-      ? DEFAULT_ENDPOINTS.filter((x) => wanted.has(x.key))
-      : DEFAULT_ENDPOINTS
+      ? allEndpoints.filter((x) => wanted.has(x.key))
+      : allEndpoints
 
     const results = await Promise.all(endpoints.map(checkOne))
     const summary = {
@@ -58,9 +72,10 @@ export default async function handler(req, res) {
       failed: results.filter((x) => !x.ok).length,
       checkedAt: new Date().toISOString(),
       selectedKeys: endpoints.map((x) => x.key),
+      minerAddress,
     }
-    return res.status(200).json({ summary, results, endpoints: DEFAULT_ENDPOINTS })
+    return res.status(200).json({ summary, results, endpoints: allEndpoints })
   } catch (error) {
-    return res.status(500).json({ error: 'Failed to run API checks', detail: String(error), endpoints: DEFAULT_ENDPOINTS })
+    return res.status(500).json({ error: 'Failed to run API checks', detail: String(error), endpoints: buildEndpoints(DEFAULT_MINER_ADDRESS) })
   }
 }

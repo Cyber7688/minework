@@ -490,6 +490,7 @@ export default function Home() {
   const [apiCheckLoading, setApiCheckLoading] = useState(false)
   const [apiCheck, setApiCheck] = useState(null)
   const [selectedApiKeys, setSelectedApiKeys] = useState(['site_home', 'site_miner_profile', 'api_health', 'api_datasets', 'api_mining_health'])
+  const [apiMinerAddress, setApiMinerAddress] = useState('0x95F92C1C955648473A4a6517dc300F789f2c4eC3')
   const [lastUpdated, setLastUpdated] = useState(null)
   const [hostFilter, setHostFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState('all')
@@ -583,10 +584,13 @@ export default function Home() {
     } catch {}
   }
 
-  async function loadApiCheck(keys = selectedApiKeys) {
+  async function loadApiCheck(keys = selectedApiKeys, minerAddress = apiMinerAddress) {
     setApiCheckLoading(true)
     try {
-      const qs = keys?.length ? `?keys=${encodeURIComponent(keys.join(','))}` : ''
+      const params = new URLSearchParams()
+      if (keys?.length) params.set('keys', keys.join(','))
+      if (minerAddress) params.set('minerAddress', minerAddress)
+      const qs = params.toString() ? `?${params.toString()}` : ''
       const res = await fetch(`/api/api-check${qs}`)
       const json = await res.json()
       setApiCheck(json)
@@ -685,11 +689,13 @@ export default function Home() {
             apiCheck={apiCheck}
             loading={apiCheckLoading}
             selectedKeys={selectedApiKeys}
+            minerAddress={apiMinerAddress}
+            onMinerAddressChange={setApiMinerAddress}
             onToggleKey={(key) => setSelectedApiKeys((prev) => prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key])}
             onSelectAll={() => setSelectedApiKeys(API_CHECK_DEFAULTS.map((x) => x.key))}
             onClearAll={() => setSelectedApiKeys([])}
-            onRunSelected={() => loadApiCheck(selectedApiKeys)}
-            onRunAll={() => loadApiCheck(API_CHECK_DEFAULTS.map((x) => x.key))}
+            onRunSelected={() => loadApiCheck(selectedApiKeys, apiMinerAddress)}
+            onRunAll={() => loadApiCheck(API_CHECK_DEFAULTS.map((x) => x.key), apiMinerAddress)}
           />
         ) : (
           <>
@@ -809,7 +815,7 @@ const API_CHECK_DEFAULTS = [
   { key: 'api_mining_health', label: 'api.minework.net /api/mining/v1/health', url: 'https://api.minework.net/api/mining/v1/health' },
 ]
 
-function ApiCheckView({ apiCheck, loading, selectedKeys, onToggleKey, onSelectAll, onClearAll, onRunSelected, onRunAll }) {
+function ApiCheckView({ apiCheck, loading, selectedKeys, minerAddress, onMinerAddressChange, onToggleKey, onSelectAll, onClearAll, onRunSelected, onRunAll }) {
   const incoming = apiCheck?.results || []
   const resultMap = new Map(incoming.map((item) => [item.key, item]))
   const endpoints = apiCheck?.endpoints || API_CHECK_DEFAULTS
@@ -819,6 +825,15 @@ function ApiCheckView({ apiCheck, loading, selectedKeys, onToggleKey, onSelectAl
   return (
     <div>
       <Panel title="SELECT ENDPOINTS">
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ color: COLORS.subtext, fontSize: 12, marginBottom: 6 }}>MINER ADDRESS (dipakai untuk endpoint /api/miners/:wallet)</div>
+          <input
+            value={minerAddress}
+            onChange={(e) => onMinerAddressChange(e.target.value)}
+            placeholder="0x..."
+            style={{ width: '100%', background: 'rgba(255,255,255,0.03)', color: COLORS.text, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: '10px 12px', outline: 'none', fontFamily: 'inherit' }}
+          />
+        </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
           <button onClick={onSelectAll} style={{ background: 'transparent', color: COLORS.cyan, border: `1px solid ${COLORS.cyan}`, borderRadius: 10, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>SELECT ALL</button>
           <button onClick={onClearAll} style={{ background: 'transparent', color: COLORS.subtext, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>CLEAR</button>
