@@ -40,15 +40,27 @@ async function checkOne(endpoint) {
 
 export default async function handler(req, res) {
   try {
-    const results = await Promise.all(DEFAULT_ENDPOINTS.map(checkOne))
+    const keysRaw = req.query.keys
+    const keys = Array.isArray(keysRaw)
+      ? keysRaw.flatMap((x) => String(x).split(','))
+      : keysRaw
+        ? String(keysRaw).split(',')
+        : []
+    const wanted = new Set(keys.map((x) => x.trim()).filter(Boolean))
+    const endpoints = wanted.size
+      ? DEFAULT_ENDPOINTS.filter((x) => wanted.has(x.key))
+      : DEFAULT_ENDPOINTS
+
+    const results = await Promise.all(endpoints.map(checkOne))
     const summary = {
       total: results.length,
       ok: results.filter((x) => x.ok).length,
       failed: results.filter((x) => !x.ok).length,
       checkedAt: new Date().toISOString(),
+      selectedKeys: endpoints.map((x) => x.key),
     }
-    return res.status(200).json({ summary, results })
+    return res.status(200).json({ summary, results, endpoints: DEFAULT_ENDPOINTS })
   } catch (error) {
-    return res.status(500).json({ error: 'Failed to run API checks', detail: String(error) })
+    return res.status(500).json({ error: 'Failed to run API checks', detail: String(error), endpoints: DEFAULT_ENDPOINTS })
   }
 }

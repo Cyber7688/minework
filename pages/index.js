@@ -489,6 +489,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [apiCheckLoading, setApiCheckLoading] = useState(false)
   const [apiCheck, setApiCheck] = useState(null)
+  const [selectedApiKeys, setSelectedApiKeys] = useState(['site_home', 'site_miner_profile', 'api_health', 'api_datasets', 'api_mining_health'])
   const [lastUpdated, setLastUpdated] = useState(null)
   const [hostFilter, setHostFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState('all')
@@ -582,15 +583,16 @@ export default function Home() {
     } catch {}
   }
 
-  async function loadApiCheck() {
+  async function loadApiCheck(keys = selectedApiKeys) {
     setApiCheckLoading(true)
     try {
-      const res = await fetch('/api/api-check')
+      const qs = keys?.length ? `?keys=${encodeURIComponent(keys.join(','))}` : ''
+      const res = await fetch(`/api/api-check${qs}`)
       const json = await res.json()
       setApiCheck(json)
       setLastUpdated(new Date())
     } catch (e) {
-      setApiCheck({ error: String(e), results: [], summary: null })
+      setApiCheck({ error: String(e), results: [], summary: null, endpoints: API_CHECK_DEFAULTS })
     }
     setApiCheckLoading(false)
   }
@@ -679,7 +681,16 @@ export default function Home() {
         </div>
 
         {viewMode === 'api-check' ? (
-          <ApiCheckView apiCheck={apiCheck} loading={apiCheckLoading} />
+          <ApiCheckView
+            apiCheck={apiCheck}
+            loading={apiCheckLoading}
+            selectedKeys={selectedApiKeys}
+            onToggleKey={(key) => setSelectedApiKeys((prev) => prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key])}
+            onSelectAll={() => setSelectedApiKeys(API_CHECK_DEFAULTS.map((x) => x.key))}
+            onClearAll={() => setSelectedApiKeys([])}
+            onRunSelected={() => loadApiCheck(selectedApiKeys)}
+            onRunAll={() => loadApiCheck(API_CHECK_DEFAULTS.map((x) => x.key))}
+          />
         ) : (
           <>
         <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -798,14 +809,37 @@ const API_CHECK_DEFAULTS = [
   { key: 'api_mining_health', label: 'api.minework.net /api/mining/v1/health', url: 'https://api.minework.net/api/mining/v1/health' },
 ]
 
-function ApiCheckView({ apiCheck, loading }) {
+function ApiCheckView({ apiCheck, loading, selectedKeys, onToggleKey, onSelectAll, onClearAll, onRunSelected, onRunAll }) {
   const incoming = apiCheck?.results || []
   const resultMap = new Map(incoming.map((item) => [item.key, item]))
-  const results = API_CHECK_DEFAULTS.map((base) => resultMap.get(base.key) || base)
+  const endpoints = apiCheck?.endpoints || API_CHECK_DEFAULTS
+  const results = endpoints.map((base) => resultMap.get(base.key) || base)
   const summary = apiCheck?.summary || null
 
   return (
     <div>
+      <Panel title="SELECT ENDPOINTS">
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+          <button onClick={onSelectAll} style={{ background: 'transparent', color: COLORS.cyan, border: `1px solid ${COLORS.cyan}`, borderRadius: 10, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>SELECT ALL</button>
+          <button onClick={onClearAll} style={{ background: 'transparent', color: COLORS.subtext, border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>CLEAR</button>
+          <button onClick={onRunSelected} disabled={loading || !selectedKeys.length} style={{ background: loading || !selectedKeys.length ? '#12304a' : '#0f766e', color: 'white', border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>CHECK SELECTED</button>
+          <button onClick={onRunAll} disabled={loading} style={{ background: loading ? '#12304a' : '#1d4ed8', color: 'white', border: `1px solid ${COLORS.border}`, borderRadius: 10, padding: '8px 12px', fontWeight: 700, cursor: 'pointer' }}>CHECK ALL</button>
+        </div>
+        <div style={{ display: 'grid', gap: 10 }}>
+          {endpoints.map((item) => {
+            const checked = selectedKeys.includes(item.key)
+            return (
+              <label key={item.key} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: 12, border: `1px solid ${checked ? COLORS.cyan : COLORS.border}`, borderRadius: 12, cursor: 'pointer', background: checked ? 'rgba(103,232,249,0.06)' : 'transparent' }}>
+                <input type="checkbox" checked={checked} onChange={() => onToggleKey(item.key)} style={{ marginTop: 3 }} />
+                <div>
+                  <div style={{ fontWeight: 700 }}>{item.label}</div>
+                  <div style={{ color: COLORS.subtext, fontSize: 12, wordBreak: 'break-all' }}>{item.url}</div>
+                </div>
+              </label>
+            )
+          })}
+        </div>
+      </Panel>
       <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
         <MetricCard label="CHECKED" value={fmt(summary?.total || 0, 0)} color={COLORS.cyan} />
         <MetricCard label="OK" value={fmt(summary?.ok || 0, 0)} color={COLORS.green} />
