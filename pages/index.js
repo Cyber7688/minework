@@ -487,6 +487,8 @@ function getStatus(summary) {
 export default function Home() {
   const [profiles, setProfiles] = useState({})
   const [loading, setLoading] = useState(false)
+  const [apiCheckLoading, setApiCheckLoading] = useState(false)
+  const [apiCheck, setApiCheck] = useState(null)
   const [lastUpdated, setLastUpdated] = useState(null)
   const [hostFilter, setHostFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState('all')
@@ -580,14 +582,35 @@ export default function Home() {
     } catch {}
   }
 
+  async function loadApiCheck() {
+    setApiCheckLoading(true)
+    try {
+      const res = await fetch('/api/api-check')
+      const json = await res.json()
+      setApiCheck(json)
+      setLastUpdated(new Date())
+    } catch (e) {
+      setApiCheck({ error: String(e), results: [], summary: null })
+    }
+    setApiCheckLoading(false)
+  }
+
   useEffect(() => {
+    if (viewMode === 'api-check') {
+      loadApiCheck()
+      return
+    }
     loadAll()
   }, [viewMode])
 
   useEffect(() => {
     if (!autoRefresh) return undefined
     const id = setInterval(() => {
-      loadAll()
+      if (viewMode === 'api-check') {
+        loadApiCheck()
+      } else {
+        loadAll()
+      }
     }, 60000)
     return () => clearInterval(id)
   }, [autoRefresh, viewMode])
@@ -619,10 +642,10 @@ export default function Home() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 26 }}>
           <div>
             <div style={{ color: COLORS.green, fontSize: 13, letterSpacing: 3, marginBottom: 10, textTransform: 'uppercase' }}>
-              &gt;_ {viewMode === 'predict' ? 'predict worknet' : viewMode === 'vast-predict' ? 'vast predict worknet' : viewMode === 'vast-mine' ? 'vast minework' : viewMode === 'tester' ? 'tester minework' : 'minework'} // cyber ops console
+              &gt;_ {viewMode === 'predict' ? 'predict worknet' : viewMode === 'vast-predict' ? 'vast predict worknet' : viewMode === 'vast-mine' ? 'vast minework' : viewMode === 'tester' ? 'tester minework' : viewMode === 'api-check' ? 'minework api check' : 'minework'} // cyber ops console
             </div>
             <h1 style={{ margin: 0, fontSize: 38, lineHeight: 1.05, textShadow: '0 0 20px rgba(103,232,249,0.18)' }}>
-              {viewMode === 'predict' ? 'Predict Fleet Dashboard' : viewMode === 'vast-predict' ? 'VAST Predict Fleet Dashboard' : viewMode === 'vast-mine' ? 'VAST Mine Fleet Dashboard' : viewMode === 'tester' ? 'Tester Mine Fleet Dashboard' : 'Fleet Monitoring Dashboard'}
+              {viewMode === 'predict' ? 'Predict Fleet Dashboard' : viewMode === 'vast-predict' ? 'VAST Predict Fleet Dashboard' : viewMode === 'vast-mine' ? 'VAST Mine Fleet Dashboard' : viewMode === 'tester' ? 'Tester Mine Fleet Dashboard' : viewMode === 'api-check' ? 'Minework API Check' : 'Fleet Monitoring Dashboard'}
             </h1>
             <p style={{ color: COLORS.subtext, marginTop: 12, marginBottom: 0, maxWidth: 860, lineHeight: 1.6 }}>
               {viewMode === 'predict'
@@ -633,12 +656,14 @@ export default function Home() {
                     ? 'Isolated VAST mine fleet view for vastminer1-vastminer100.'
                     : viewMode === 'tester'
                       ? 'Dedicated tester tab for the new 100 mine workers (wallet001-wallet100).'
-                      : 'Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.'}
+                      : viewMode === 'api-check'
+                        ? 'Quick health/reachability check for key Minework web and API endpoints directly from this dashboard.'
+                        : 'Full wallet visibility, filters, copyable addresses, and a mobile-friendly ops view.'}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <button onClick={loadAll} disabled={loading} style={{ background: loading ? '#12304a' : '#0f766e', color: 'white', border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 0 24px rgba(20,184,166,0.18)' }}>
-              {loading ? 'SYNCING...' : 'REFRESH ALL'}
+            <button onClick={viewMode === 'api-check' ? loadApiCheck : loadAll} disabled={viewMode === 'api-check' ? apiCheckLoading : loading} style={{ background: (viewMode === 'api-check' ? apiCheckLoading : loading) ? '#12304a' : '#0f766e', color: 'white', border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 0 24px rgba(20,184,166,0.18)' }}>
+              {(viewMode === 'api-check' ? apiCheckLoading : loading) ? 'SYNCING...' : 'REFRESH ALL'}
             </button>
             <div style={{ color: COLORS.subtext, fontSize: 12 }}>
               {lastUpdated ? `last sync :: ${lastUpdated.toLocaleString()}` : 'last sync :: never'}
@@ -649,10 +674,14 @@ export default function Home() {
         <div className="top-controls" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
           <ViewToggle value={viewMode} onChange={switchView} />
           <AutoRefreshToggle value={autoRefresh} onChange={setAutoRefresh} />
-          <FilterBox label="HOST" value={hostFilter} onChange={setHostFilter} options={hostOptions} />
-          <FilterBox label="ROLE" value={roleFilter} onChange={setRoleFilter} options={roleOptions} />
+          {viewMode !== 'api-check' && <FilterBox label="HOST" value={hostFilter} onChange={setHostFilter} options={hostOptions} />}
+          {viewMode !== 'api-check' && <FilterBox label="ROLE" value={roleFilter} onChange={setRoleFilter} options={roleOptions} />}
         </div>
 
+        {viewMode === 'api-check' ? (
+          <ApiCheckView apiCheck={apiCheck} />
+        ) : (
+          <>
         <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
           <MetricCard label="RUNNING" value={fmt(totals.running, 0)} color={COLORS.green} />
           <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.yellow} />
@@ -754,6 +783,58 @@ export default function Home() {
             )
           })}
         </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ApiCheckView({ apiCheck }) {
+  const results = apiCheck?.results || []
+  const summary = apiCheck?.summary || null
+
+  return (
+    <div>
+      <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+        <MetricCard label="CHECKED" value={fmt(summary?.total || 0, 0)} color={COLORS.cyan} />
+        <MetricCard label="OK" value={fmt(summary?.ok || 0, 0)} color={COLORS.green} />
+        <MetricCard label="FAILED" value={fmt(summary?.failed || 0, 0)} color={COLORS.red} />
+        <MetricCard label="LAST RUN" value={summary?.checkedAt ? new Date(summary.checkedAt).toLocaleTimeString() : '-'} color={COLORS.purple} />
+      </div>
+
+      {apiCheck?.error && (
+        <Panel title="API CHECK ERROR">
+          <div style={{ color: COLORS.red, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{apiCheck.error}</div>
+        </Panel>
+      )}
+
+      <div style={{ display: 'grid', gap: 14 }}>
+        {results.map((item) => {
+          const good = item.ok
+          return (
+            <div key={item.key} style={{ background: COLORS.panel, border: `1px solid ${good ? COLORS.green : COLORS.red}`, borderRadius: 16, padding: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontWeight: 800, marginBottom: 4 }}>{item.label}</div>
+                  <div style={{ color: COLORS.subtext, fontSize: 12, wordBreak: 'break-all' }}>{item.url}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Badge color={good ? COLORS.green : COLORS.red} text={good ? `OK ${item.status}` : (item.status ? `FAIL ${item.status}` : 'ERROR')} />
+                  <Badge color={COLORS.cyan} text={`${fmt(item.elapsedMs || 0, 0)} ms`} />
+                </div>
+              </div>
+              {item.error ? (
+                <div style={{ color: COLORS.red, fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.error}</div>
+              ) : (
+                <>
+                  <div style={{ color: COLORS.subtext, fontSize: 12, marginBottom: 8 }}>Headers: {Object.entries(item.headers || {}).slice(0, 6).map(([k, v]) => `${k}=${v}`).join(' | ') || '-'}</div>
+                  <pre style={{ margin: 0, background: 'rgba(255,255,255,0.03)', border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: 12, color: COLORS.text, fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.bodyPreview || '(empty body)'}</pre>
+                </>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -834,6 +915,7 @@ function ViewToggle({ value, onChange }) {
     { value: 'vast-mine', label: 'VAST MINER' },
     { value: 'vast-predict', label: 'VAST PREDICT' },
     { value: 'tester', label: 'TESTER' },
+    { value: 'api-check', label: 'API CHECK' },
   ]
 
   return (
