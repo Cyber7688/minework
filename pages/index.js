@@ -679,7 +679,7 @@ export default function Home() {
         </div>
 
         {viewMode === 'api-check' ? (
-          <ApiCheckView apiCheck={apiCheck} />
+          <ApiCheckView apiCheck={apiCheck} loading={apiCheckLoading} />
         ) : (
           <>
         <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -790,8 +790,18 @@ export default function Home() {
   )
 }
 
-function ApiCheckView({ apiCheck }) {
-  const results = apiCheck?.results || []
+const API_CHECK_DEFAULTS = [
+  { key: 'site_home', label: 'minework.net /', url: 'https://minework.net' },
+  { key: 'site_miner_profile', label: 'minework.net /api/miners/:sample', url: 'https://minework.net/api/miners/0x95F92C1C955648473A4a6517dc300F789f2c4eC3' },
+  { key: 'api_health', label: 'api.minework.net /health', url: 'https://api.minework.net/health' },
+  { key: 'api_datasets', label: 'api.minework.net /api/core/v1/datasets', url: 'https://api.minework.net/api/core/v1/datasets' },
+  { key: 'api_mining_health', label: 'api.minework.net /api/mining/v1/health', url: 'https://api.minework.net/api/mining/v1/health' },
+]
+
+function ApiCheckView({ apiCheck, loading }) {
+  const incoming = apiCheck?.results || []
+  const resultMap = new Map(incoming.map((item) => [item.key, item]))
+  const results = API_CHECK_DEFAULTS.map((base) => resultMap.get(base.key) || base)
   const summary = apiCheck?.summary || null
 
   return (
@@ -800,8 +810,20 @@ function ApiCheckView({ apiCheck }) {
         <MetricCard label="CHECKED" value={fmt(summary?.total || 0, 0)} color={COLORS.cyan} />
         <MetricCard label="OK" value={fmt(summary?.ok || 0, 0)} color={COLORS.green} />
         <MetricCard label="FAILED" value={fmt(summary?.failed || 0, 0)} color={COLORS.red} />
-        <MetricCard label="LAST RUN" value={summary?.checkedAt ? new Date(summary.checkedAt).toLocaleTimeString() : '-'} color={COLORS.purple} />
+        <MetricCard label="LAST RUN" value={summary?.checkedAt ? new Date(summary.checkedAt).toLocaleTimeString() : (loading ? 'LOADING' : 'NOT YET')} color={COLORS.purple} />
       </div>
+
+      <Panel title="API CHECK STATUS">
+        <div style={{ color: COLORS.subtext, lineHeight: 1.7 }}>
+          {loading
+            ? 'Lagi ngecek endpoint Minework... tunggu bentar, hasil bakal nongol otomatis.'
+            : apiCheck?.error
+              ? 'Check jalan tapi ada error global. Detail ada di bawah.'
+              : summary
+                ? `Last run ${new Date(summary.checkedAt).toLocaleString()} · ${summary.ok}/${summary.total} endpoint sehat.`
+                : 'Belum ada hasil check. Klik REFRESH ALL kalau perlu.'}
+        </div>
+      </Panel>
 
       {apiCheck?.error && (
         <Panel title="API CHECK ERROR">
@@ -811,20 +833,26 @@ function ApiCheckView({ apiCheck }) {
 
       <div style={{ display: 'grid', gap: 14 }}>
         {results.map((item) => {
-          const good = item.ok
+          const hasRealResult = Object.prototype.hasOwnProperty.call(item, 'ok')
+          const good = item.ok === true
+          const borderColor = !hasRealResult ? COLORS.border : good ? COLORS.green : COLORS.red
+          const badgeText = !hasRealResult ? (loading ? 'CHECKING' : 'PENDING') : good ? `OK ${item.status}` : (item.status ? `FAIL ${item.status}` : 'ERROR')
+          const badgeColor = !hasRealResult ? COLORS.yellow : good ? COLORS.green : COLORS.red
           return (
-            <div key={item.key} style={{ background: COLORS.panel, border: `1px solid ${good ? COLORS.green : COLORS.red}`, borderRadius: 16, padding: 16 }}>
+            <div key={item.key} style={{ background: COLORS.panel, border: `1px solid ${borderColor}`, borderRadius: 16, padding: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
                 <div>
                   <div style={{ fontWeight: 800, marginBottom: 4 }}>{item.label}</div>
                   <div style={{ color: COLORS.subtext, fontSize: 12, wordBreak: 'break-all' }}>{item.url}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Badge color={good ? COLORS.green : COLORS.red} text={good ? `OK ${item.status}` : (item.status ? `FAIL ${item.status}` : 'ERROR')} />
-                  <Badge color={COLORS.cyan} text={`${fmt(item.elapsedMs || 0, 0)} ms`} />
+                  <Badge color={badgeColor} text={badgeText} />
+                  <Badge color={COLORS.cyan} text={hasRealResult ? `${fmt(item.elapsedMs || 0, 0)} ms` : '-'} />
                 </div>
               </div>
-              {item.error ? (
+              {!hasRealResult ? (
+                <div style={{ color: COLORS.subtext, fontSize: 13 }}>Belum ada hasil untuk endpoint ini.</div>
+              ) : item.error ? (
                 <div style={{ color: COLORS.red, fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.error}</div>
               ) : (
                 <>
