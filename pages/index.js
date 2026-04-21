@@ -905,6 +905,9 @@ function ApiCheckView({ apiCheck, loading, selectedKeys, minerAddress, onMinerAd
                 <div style={{ color: COLORS.red, fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.error}</div>
               ) : (
                 <>
+                  {item.note ? (
+                    <div style={{ color: COLORS.yellow, fontSize: 12, marginBottom: 8 }}>{item.note}</div>
+                  ) : null}
                   <div style={{ color: COLORS.subtext, fontSize: 12, marginBottom: 8 }}>Headers: {Object.entries(item.headers || {}).slice(0, 6).map(([k, v]) => `${k}=${v}`).join(' | ') || '-'}</div>
                   <pre style={{ margin: 0, background: 'rgba(255,255,255,0.03)', border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: 12, color: COLORS.text, fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.bodyPreview || '(empty body)'}</pre>
                 </>

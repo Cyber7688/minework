@@ -4,9 +4,28 @@ const DEFAULT_ENDPOINTS = [
   { key: 'site_home', label: 'minework.net /', url: 'https://minework.net' },
   { key: 'site_miner_profile', label: 'minework.net /api/miners/:wallet', url: `https://minework.net/api/miners/${DEFAULT_MINER_ADDRESS}` },
   { key: 'api_health', label: 'api.minework.net /health', url: 'https://api.minework.net/health' },
+  { key: 'api_signature_config', label: 'api.minework.net /api/public/v1/signature-config', url: 'https://api.minework.net/api/public/v1/signature-config' },
   { key: 'api_datasets', label: 'api.minework.net /api/core/v1/datasets', url: 'https://api.minework.net/api/core/v1/datasets' },
+  { key: 'api_dedup_check', label: 'api.minework.net /api/core/v1/dedup/check (unauth probe)', url: 'https://api.minework.net/api/core/v1/dedup/check' },
+  { key: 'api_mining_heartbeat', label: 'api.minework.net /api/mining/v1/heartbeat (unauth probe)', url: 'https://api.minework.net/api/mining/v1/heartbeat', okStatuses: [400, 401, 405] },
+  { key: 'api_miner_ready', label: 'api.minework.net /api/mining/v1/miners/ready (unauth probe)', url: 'https://api.minework.net/api/mining/v1/miners/ready', okStatuses: [400, 401, 405] },
+  { key: 'api_repeat_claim', label: 'api.minework.net /api/mining/v1/repeat-crawl-tasks/claim (unauth probe)', url: 'https://api.minework.net/api/mining/v1/repeat-crawl-tasks/claim', okStatuses: [400, 401, 405] },
+  { key: 'api_ws_probe', label: 'api.minework.net /api/mining/v1/ws (HTTP probe)', url: 'https://api.minework.net/api/mining/v1/ws', okStatuses: [400, 404, 405, 426] },
   { key: 'api_mining_health', label: 'api.minework.net /api/mining/v1/health', url: 'https://api.minework.net/api/mining/v1/health' },
 ]
+
+function isEndpointOk(endpoint, upstream) {
+  if (upstream.ok) return true
+  const accepted = Array.isArray(endpoint.okStatuses) ? endpoint.okStatuses : []
+  return accepted.includes(upstream.status)
+}
+
+function endpointNote(endpoint, upstream) {
+  if (!Array.isArray(endpoint.okStatuses) || !endpoint.okStatuses.includes(upstream.status)) {
+    return null
+  }
+  return `accepted non-200 status ${upstream.status} for probe`
+}
 
 function buildEndpoints(minerAddress = DEFAULT_MINER_ADDRESS) {
   return DEFAULT_ENDPOINTS.map((endpoint) =>
@@ -28,11 +47,12 @@ async function checkOne(endpoint) {
     const text = await upstream.text()
     return {
       ...endpoint,
-      ok: upstream.ok,
+      ok: isEndpointOk(endpoint, upstream),
       status: upstream.status,
       elapsedMs: Date.now() - startedAt,
       headers: Object.fromEntries(Array.from(upstream.headers.entries()).slice(0, 12)),
       bodyPreview: text.slice(0, 500),
+      note: endpointNote(endpoint, upstream),
       error: null,
     }
   } catch (error) {
