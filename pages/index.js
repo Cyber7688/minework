@@ -489,7 +489,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [apiCheckLoading, setApiCheckLoading] = useState(false)
   const [apiCheck, setApiCheck] = useState(null)
-  const [selectedApiKeys, setSelectedApiKeys] = useState(['site_home', 'site_miner_profile', 'api_health', 'api_datasets', 'api_mining_health'])
+  const [selectedApiKeys, setSelectedApiKeys] = useState(API_CHECK_DEFAULTS.map((x) => x.key))
   const [apiMinerAddress, setApiMinerAddress] = useState('0x95F92C1C955648473A4a6517dc300F789f2c4eC3')
   const [lastUpdated, setLastUpdated] = useState(null)
   const [hostFilter, setHostFilter] = useState('all')
@@ -811,7 +811,13 @@ const API_CHECK_DEFAULTS = [
   { key: 'site_home', label: 'minework.net /', url: 'https://minework.net' },
   { key: 'site_miner_profile', label: 'minework.net /api/miners/:sample', url: 'https://minework.net/api/miners/0x95F92C1C955648473A4a6517dc300F789f2c4eC3' },
   { key: 'api_health', label: 'api.minework.net /health', url: 'https://api.minework.net/health' },
+  { key: 'api_signature_config', label: 'api.minework.net /api/public/v1/signature-config', url: 'https://api.minework.net/api/public/v1/signature-config' },
   { key: 'api_datasets', label: 'api.minework.net /api/core/v1/datasets', url: 'https://api.minework.net/api/core/v1/datasets' },
+  { key: 'api_dedup_check', label: 'api.minework.net /api/core/v1/dedup/check (unauth probe)', url: 'https://api.minework.net/api/core/v1/dedup/check' },
+  { key: 'api_mining_heartbeat', label: 'api.minework.net /api/mining/v1/heartbeat (unauth probe)', url: 'https://api.minework.net/api/mining/v1/heartbeat' },
+  { key: 'api_miner_ready', label: 'api.minework.net /api/mining/v1/miners/ready (unauth probe)', url: 'https://api.minework.net/api/mining/v1/miners/ready' },
+  { key: 'api_repeat_claim', label: 'api.minework.net /api/mining/v1/repeat-crawl-tasks/claim (unauth probe)', url: 'https://api.minework.net/api/mining/v1/repeat-crawl-tasks/claim' },
+  { key: 'api_ws_probe', label: 'api.minework.net /api/mining/v1/ws (HTTP probe)', url: 'https://api.minework.net/api/mining/v1/ws' },
   { key: 'api_mining_health', label: 'api.minework.net /api/mining/v1/health', url: 'https://api.minework.net/api/mining/v1/health' },
 ]
 
