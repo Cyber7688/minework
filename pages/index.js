@@ -478,9 +478,51 @@ function extractSummary(profile, history, wallet, extras = {}) {
   }
 }
 
+function stabilizeSummary(summary, prevSummary, now = Date.now()) {
+  if (!summary) {
+    if (!prevSummary) return null
+    const lastSeenOnlineAt = prevSummary.lastSeenOnlineAt || null
+    const consecutiveOffline = Number(prevSummary.consecutiveOffline || 0) + 1
+    const statusState = lastSeenOnlineAt && consecutiveOffline <= 2 ? 'unstable' : 'unknown'
+    return {
+      ...prevSummary,
+      online: false,
+      fetchOk: false,
+      consecutiveOffline,
+      statusState,
+      lastCheckedAt: now,
+    }
+  }
+
+  if (summary.online) {
+    return {
+      ...summary,
+      fetchOk: true,
+      consecutiveOffline: 0,
+      lastSeenOnlineAt: now,
+      lastCheckedAt: now,
+      statusState: 'running',
+    }
+  }
+
+  const lastSeenOnlineAt = prevSummary?.lastSeenOnlineAt || null
+  const consecutiveOffline = Number(prevSummary?.consecutiveOffline || 0) + 1
+  const statusState = lastSeenOnlineAt && consecutiveOffline <= 2 ? 'unstable' : 'stopped'
+  return {
+    ...summary,
+    fetchOk: true,
+    consecutiveOffline,
+    lastSeenOnlineAt,
+    lastCheckedAt: now,
+    statusState,
+  }
+}
+
 function getStatus(summary) {
   if (!summary) return { label: 'UNKNOWN', color: COLORS.yellow }
-  if (summary.online) return { label: 'RUNNING', color: COLORS.green }
+  if (summary.statusState === 'running' || summary.online) return { label: 'RUNNING', color: COLORS.green }
+  if (summary.statusState === 'unstable') return { label: 'UNSTABLE', color: COLORS.yellow }
+  if (summary.statusState === 'unknown') return { label: 'UNKNOWN', color: COLORS.blue }
   return { label: 'STOPPED', color: COLORS.red }
 }
 
@@ -532,8 +574,9 @@ export default function Home() {
   const totals = useMemo(() => {
     const summaries = filteredRows.map((x) => x.summary).filter(Boolean)
     return {
-      running: summaries.filter((x) => x.online).length,
-      stopped: filteredRows.length - summaries.filter((x) => x.online).length,
+      running: summaries.filter((x) => x.statusState === 'running' || x.online).length,
+      unstable: summaries.filter((x) => x.statusState === 'unstable').length,
+      stopped: summaries.filter((x) => !x.online && x.statusState !== 'unstable').length,
       tasks: summaries.reduce((sum, x) => sum + (Number(x.taskCount) || 0), 0),
       rewards: summaries.reduce((sum, x) => sum + (Number(x.totalRewards) || 0), 0),
       avgScore: summaries.length ? summaries.reduce((sum, x) => sum + (Number(x.avgScore) || 0), 0) / summaries.length : 0,
@@ -543,7 +586,10 @@ export default function Home() {
 
   async function loadAll() {
     setLoading(true)
+    const now = Date.now()
+    const snapshot = profiles
     const entries = await Promise.all(activeWallets.map(async (wallet) => {
+      const prev = snapshot[wallet.address]
       try {
         const endpoint = wallet.role === 'predict' ? 'predict-profile' : 'mine-profile'
         const res = await fetch(`/api/${endpoint}?address=${wallet.address}`)
@@ -554,18 +600,19 @@ export default function Home() {
           equity: json.equity || null,
           epoch: json.epoch || null,
         }
+        const rawSummary = extractSummary(profile, history, wallet, extras)
         return [wallet.address, {
           wallet,
           profile,
           history,
-          summary: extractSummary(profile, history, wallet, extras),
+          summary: stabilizeSummary(rawSummary, prev?.summary, now),
         }]
       } catch (e) {
         return [wallet.address, {
           wallet,
-          profile: null,
-          history: [],
-          summary: null,
+          profile: prev?.profile || null,
+          history: prev?.history || [],
+          summary: stabilizeSummary(null, prev?.summary, now),
           error: String(e),
         }]
       }
@@ -699,9 +746,10 @@ export default function Home() {
           />
         ) : (
           <>
-        <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
           <MetricCard label="RUNNING" value={fmt(totals.running, 0)} color={COLORS.green} />
-          <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.yellow} />
+          <MetricCard label="UNSTABLE" value={fmt(totals.unstable, 0)} color={COLORS.yellow} />
+          <MetricCard label="STOPPED" value={fmt(totals.stopped, 0)} color={COLORS.red} />
           <MetricCard label={viewMode === 'predict' ? 'SUBMISSIONS' : 'EPOCH TASKS'} value={fmt(totals.tasks, 0)} color={COLORS.cyan} />
           <MetricCard label={viewMode === 'predict' ? 'CORRECT' : 'QUALIFIED'} value={fmt(totals.qualifiedEpochs, 0)} color={COLORS.purple} />
           <MetricCard label={viewMode === 'predict' ? 'EST. REWARD' : 'REWARDS'} value={fmt(totals.rewards)} color={COLORS.green} />
