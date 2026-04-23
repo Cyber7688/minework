@@ -551,9 +551,11 @@ function stabilizeSummary(summary, prevSummary, now = Date.now(), options = {}) 
 
 function getStatus(summary) {
   if (!summary) return { label: 'UNKNOWN', color: COLORS.yellow }
-  if (summary.statusState === 'running' || summary.online) return { label: 'RUNNING', color: COLORS.green }
   if (summary.statusState === 'unstable') return { label: 'UNSTABLE', color: COLORS.yellow }
   if (summary.statusState === 'unknown') return { label: 'UNKNOWN', color: COLORS.blue }
+  if (summary.statusState === 'stopped') return { label: 'STOPPED', color: COLORS.red }
+  if (summary.statusState === 'running') return { label: 'RUNNING', color: COLORS.green }
+  if (summary.online) return { label: 'RUNNING', color: COLORS.green }
   return { label: 'STOPPED', color: COLORS.red }
 }
 
@@ -604,10 +606,16 @@ export default function Home() {
 
   const totals = useMemo(() => {
     const summaries = filteredRows.map((x) => x.summary).filter(Boolean)
+    const counts = summaries.reduce((acc, summary) => {
+      const status = getStatus(summary).label
+      if (status === 'RUNNING') acc.running += 1
+      else if (status === 'UNSTABLE') acc.unstable += 1
+      else if (status === 'STOPPED') acc.stopped += 1
+      else acc.unknown += 1
+      return acc
+    }, { running: 0, unstable: 0, stopped: 0, unknown: 0 })
     return {
-      running: summaries.filter((x) => x.statusState === 'running' || x.online).length,
-      unstable: summaries.filter((x) => x.statusState === 'unstable').length,
-      stopped: summaries.filter((x) => !x.online && x.statusState !== 'unstable').length,
+      ...counts,
       tasks: summaries.reduce((sum, x) => sum + (Number(x.taskCount) || 0), 0),
       rewards: summaries.reduce((sum, x) => sum + (Number(x.totalRewards) || 0), 0),
       avgScore: summaries.length ? summaries.reduce((sum, x) => sum + (Number(x.avgScore) || 0), 0) / summaries.length : 0,
