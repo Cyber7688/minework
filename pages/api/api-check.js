@@ -6,12 +6,11 @@ const DEFAULT_ENDPOINTS = [
   { key: 'api_health', label: 'api.minework.net /health', url: 'https://api.minework.net/health' },
   { key: 'api_signature_config', label: 'api.minework.net /api/public/v1/signature-config', url: 'https://api.minework.net/api/public/v1/signature-config' },
   { key: 'api_datasets', label: 'api.minework.net /api/core/v1/datasets', url: 'https://api.minework.net/api/core/v1/datasets' },
-  { key: 'api_dedup_check', label: 'api.minework.net /api/core/v1/dedup/check (unauth probe)', url: 'https://api.minework.net/api/core/v1/dedup/check' },
-  { key: 'api_mining_heartbeat', label: 'api.minework.net /api/mining/v1/heartbeat (unauth probe)', url: 'https://api.minework.net/api/mining/v1/heartbeat', okStatuses: [400, 401, 405] },
-  { key: 'api_miner_ready', label: 'api.minework.net /api/mining/v1/miners/ready (unauth probe)', url: 'https://api.minework.net/api/mining/v1/miners/ready', okStatuses: [400, 401, 405] },
-  { key: 'api_repeat_claim', label: 'api.minework.net /api/mining/v1/repeat-crawl-tasks/claim (unauth probe)', url: 'https://api.minework.net/api/mining/v1/repeat-crawl-tasks/claim', okStatuses: [400, 401, 405] },
-  { key: 'api_ws_probe', label: 'api.minework.net /api/mining/v1/ws (HTTP probe)', url: 'https://api.minework.net/api/mining/v1/ws', okStatuses: [400, 404, 405, 426] },
-  { key: 'api_mining_health', label: 'api.minework.net /api/mining/v1/health', url: 'https://api.minework.net/api/mining/v1/health' },
+  { key: 'api_dedup_check', label: 'api.minework.net /api/core/v1/dedup/check (validation probe)', url: 'https://api.minework.net/api/core/v1/dedup/check', method: 'POST', body: {}, okStatuses: [400, 401, 405] },
+  { key: 'api_mining_heartbeat', label: 'api.minework.net /api/mining/v1/heartbeat (unauth POST probe)', url: 'https://api.minework.net/api/mining/v1/heartbeat', method: 'POST', body: {}, okStatuses: [400, 401, 405] },
+  { key: 'api_miner_ready', label: 'api.minework.net /api/mining/v1/miners/ready (unauth POST probe)', url: 'https://api.minework.net/api/mining/v1/miners/ready', method: 'POST', body: {}, okStatuses: [400, 401, 405] },
+  { key: 'api_repeat_claim', label: 'api.minework.net /api/mining/v1/repeat-crawl-tasks/claim (unauth POST probe)', url: 'https://api.minework.net/api/mining/v1/repeat-crawl-tasks/claim', method: 'POST', body: {}, okStatuses: [400, 401, 405] },
+  { key: 'api_ws_probe', label: 'api.minework.net /api/mining/v1/ws (HTTP probe)', url: 'https://api.minework.net/api/mining/v1/ws', okStatuses: [400, 401, 404, 405, 426] },
 ]
 
 function isEndpointOk(endpoint, upstream) {
@@ -38,12 +37,19 @@ function buildEndpoints(minerAddress = DEFAULT_MINER_ADDRESS) {
 async function checkOne(endpoint) {
   const startedAt = Date.now()
   try {
-    const upstream = await fetch(endpoint.url, {
-      method: 'GET',
-      headers: { 'User-Agent': 'minework-dashboard/0.2 api-check' },
+    const method = endpoint.method || 'GET'
+    const headers = { 'User-Agent': 'minework-dashboard/0.2 api-check' }
+    const options = {
+      method,
+      headers,
       signal: AbortSignal.timeout(12000),
       cache: 'no-store',
-    })
+    }
+    if (method !== 'GET') {
+      headers['Content-Type'] = 'application/json'
+      options.body = JSON.stringify(endpoint.body ?? {})
+    }
+    const upstream = await fetch(endpoint.url, options)
     const text = await upstream.text()
     return {
       ...endpoint,
