@@ -492,19 +492,34 @@ function extractSummary(profile, history, wallet, extras = {}) {
   }
 }
 
-function stabilizeSummary(summary, prevSummary, now = Date.now()) {
+function stabilizeSummary(summary, prevSummary, now = Date.now(), options = {}) {
+  const preserveAsStale = Boolean(options.preserveAsStale)
+
   if (!summary) {
     if (!prevSummary) return null
     const lastSeenOnlineAt = prevSummary.lastSeenOnlineAt || null
     const consecutiveOffline = Number(prevSummary.consecutiveOffline || 0) + 1
-    const statusState = lastSeenOnlineAt && consecutiveOffline <= 2 ? 'unstable' : 'unknown'
+    const statusState = lastSeenOnlineAt && consecutiveOffline <= 6 ? 'unstable' : 'unknown'
     return {
       ...prevSummary,
-      online: false,
       fetchOk: false,
+      stale: true,
       consecutiveOffline,
       statusState,
       lastCheckedAt: now,
+    }
+  }
+
+  if (preserveAsStale && prevSummary) {
+    const lastSeenOnlineAt = prevSummary.lastSeenOnlineAt || now
+    return {
+      ...prevSummary,
+      fetchOk: false,
+      stale: true,
+      consecutiveOffline: Number(prevSummary.consecutiveOffline || 0) + 1,
+      lastSeenOnlineAt,
+      lastCheckedAt: now,
+      statusState: 'unstable',
     }
   }
 
@@ -512,6 +527,7 @@ function stabilizeSummary(summary, prevSummary, now = Date.now()) {
     return {
       ...summary,
       fetchOk: true,
+      stale: false,
       consecutiveOffline: 0,
       lastSeenOnlineAt: now,
       lastCheckedAt: now,
@@ -525,6 +541,7 @@ function stabilizeSummary(summary, prevSummary, now = Date.now()) {
   return {
     ...summary,
     fetchOk: true,
+    stale: false,
     consecutiveOffline,
     lastSeenOnlineAt,
     lastCheckedAt: now,
@@ -615,11 +632,14 @@ export default function Home() {
           epoch: json.epoch || null,
         }
         const rawSummary = extractSummary(profile, history, wallet, extras)
+        const isBadSnapshot = wallet.role !== 'predict' && !profile && (!Array.isArray(history) || history.length === 0)
+        const stableSummary = stabilizeSummary(rawSummary, prev?.summary, now, { preserveAsStale: isBadSnapshot })
         return [wallet.address, {
           wallet,
-          profile,
-          history,
-          summary: stabilizeSummary(rawSummary, prev?.summary, now),
+          profile: isBadSnapshot ? (prev?.profile || null) : profile,
+          history: isBadSnapshot ? (prev?.history || []) : history,
+          summary: stableSummary,
+          badSnapshot: isBadSnapshot,
         }]
       } catch (e) {
         return [wallet.address, {
