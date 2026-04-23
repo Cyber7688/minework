@@ -450,6 +450,7 @@ function extractSummary(profile, history, wallet, extras = {}) {
   const currentEpochValidator = profile?.current_epoch?.validator || {}
   const minerSummary = profile?.miner_summary || {}
   const validatorSummary = profile?.validator_summary || {}
+  const lastHistory = Array.isArray(history) && history.length ? history[0] : null
   const totalRewards = wallet.role === 'validator'
     ? (validatorSummary?.total_rewards ?? 0)
     : (minerSummary?.total_rewards ?? history.reduce((sum, item) => sum + (Number(item.reward_amount) || 0), 0))
@@ -457,21 +458,34 @@ function extractSummary(profile, history, wallet, extras = {}) {
 
   const validatorEpochTasks = Number(currentEpochValidator.eval_count ?? 0)
   const validatorLifetimeEvals = Number(validatorSummary.total_evals ?? 0)
-  const minerEpochTasks = Number(currentEpochMiner.task_count ?? 0)
-  const minerLifetimeTasks = Number(minerSummary.total_tasks ?? 0)
+  const minerEpochTasks = Number(currentEpochMiner.task_count ?? lastHistory?.task_count ?? 0)
+  const minerLifetimeTasks = Number(minerSummary.total_tasks ?? history.reduce((sum, item) => sum + (Number(item.task_count) || 0), 0))
 
   const accuracy = wallet.role === 'validator'
     ? Number(currentEpochValidator.accuracy ?? validatorSummary.avg_accuracy ?? 0)
-    : Number(currentEpochMiner.accuracy ?? minerSummary.accuracy ?? currentEpochMiner.avg_score ?? minerSummary.avg_score ?? 0)
+    : Number(currentEpochMiner.accuracy ?? minerSummary.accuracy ?? currentEpochMiner.avg_score ?? minerSummary.avg_score ?? lastHistory?.avg_score ?? 0)
+
+  const explicitOnline = wallet.role === 'validator' ? validator.online : miner.online
+  const hasCurrentEpochActivity = wallet.role === 'validator'
+    ? validatorEpochTasks > 0
+    : minerEpochTasks > 0
+  const hasLifetimeActivity = wallet.role === 'validator'
+    ? validatorLifetimeEvals > 0
+    : minerLifetimeTasks > 0
+  const hasCredit = Number(wallet.role === 'validator' ? validator.credit : miner.credit) > 0
+  const inferredOnline = explicitOnline == null
+    ? (hasCurrentEpochActivity || hasCredit || hasLifetimeActivity)
+    : Boolean(explicitOnline)
 
   return {
-    online: wallet.role === 'validator' ? Boolean(validator.online) : Boolean(miner.online),
+    online: inferredOnline,
+    onlineSource: explicitOnline == null ? 'inferred' : 'explicit',
     credit: wallet.role === 'validator' ? (validator.credit ?? 0) : (miner.credit ?? 0),
     taskCount: wallet.role === 'validator' ? validatorEpochTasks : minerEpochTasks,
     lifetimeTaskCount: wallet.role === 'validator' ? validatorLifetimeEvals : minerLifetimeTasks,
     avgScore: wallet.role === 'validator'
       ? Number(currentEpochValidator.accuracy ?? validatorSummary.avg_accuracy ?? 0)
-      : Number(currentEpochMiner.avg_score ?? minerSummary.avg_score ?? 0),
+      : Number(currentEpochMiner.avg_score ?? minerSummary.avg_score ?? lastHistory?.avg_score ?? 0),
     accuracy,
     totalRewards,
     qualifiedEpochs,
